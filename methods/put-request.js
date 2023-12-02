@@ -3,6 +3,10 @@ const writeToFile = require("../util/write-to-file");
 
 const path = require('path');
 
+const id = new RegExp(
+  /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+);
+
 // Assuming movies.json is in the 'data' directory at the root of your project
 // const moviesDataPath = path.join(__dirname, '..', 'data', 'data.json');
 
@@ -20,7 +24,7 @@ module.exports = async (req, res) => {
       req.datas[0] = { id, ...body };
 
       writeToFile(req.datas);
-      
+
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(req.datas[0]));
     } catch (err) {

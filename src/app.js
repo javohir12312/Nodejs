@@ -7,7 +7,7 @@ let data = require("../data/data.json");
 //require("dotenv").config();
 
 const PORT = process.env.PORT || 5001;
-
+// app.use(cors());
 const server = http.createServer((req, res) => {
   req.data = data;
   switch (req.method) {

@@ -1,6 +1,13 @@
 const requestBodyparser = require("../util/body-parser");
 const writeToFile = require("../util/write-to-file");
 
+const path = require('path');
+
+// Assuming movies.json is in the 'data' directory at the root of your project
+// const moviesDataPath = path.join(__dirname, '..', 'data', 'data.json');
+
+// const moviesData = require(moviesDataPath);
+
 module.exports = async (req, res) => {
   if (req.url === "/api/hero") {
     try {

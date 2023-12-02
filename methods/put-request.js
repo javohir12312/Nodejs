@@ -17,10 +17,10 @@ module.exports = async (req, res) => {
       req.datas = req.datas || [];
 
       // Assuming you want to add the body object to req.datas
-      req.datas[0] = { ...body };
+      req.datas[0] = { id, ...body };
 
       writeToFile(req.datas);
-
+      
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(req.datas[0]));
     } catch (err) {

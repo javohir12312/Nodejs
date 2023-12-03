@@ -30,7 +30,7 @@
         blogDiv.innerHTML = `
           <h2>${blog.title}</h2>
           <p>${blog.description}</p>
-          <img src="https://test213-829e5b1ab71c.herokuapp.com/uploads/${blog.image}" alt="${blog.title}">
+          <img src="https://test213-829e5b1ab71c.herokuapp.com${blog.image}" alt="${blog.title}">
         `;
         blogListContainer.appendChild(blogDiv);
         console.log(blog);

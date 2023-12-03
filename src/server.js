@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const path = require("path");
 const Blog = require("../model/model");
 
 const app = express();
@@ -13,20 +15,26 @@ async function connect() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+    console.log("Connected to MongoDB");
   } catch (error) {
-    console.error(error);
+    console.error(error + "sadaaaaaaaaaaaaaaaaa");
   }
 }
 
 app.use(cors());
-app.use(express.json()); // Use built-in Express JSON middleware
-
-
+app.use(express.json());
 
 app.get("/api/hero", (req, res) => {
   Blog.find()
     .then((result) => {
-      res.send(result);
+      const blogsWithUrls = result.map(blog => {
+        return {
+          ...blog._doc,
+          image: `/uploads`,
+        };
+      });
+
+      res.send(blogsWithUrls);
     })
     .catch((err) => {
       console.log(err);
@@ -38,63 +46,40 @@ app.get("/api/hero/:id", (req, res) => {
 
   Blog.findById(blogId)
     .then((result) => {
-      res.send(result);
+      const blogWithUrl = {
+        ...result._doc,
+        image: `/uploads/${result.image}`,
+      };
+
+      res.send(blogWithUrl);
     })
     .catch((err) => {
       console.log(err);
     });
 });
 
+app.post("/api/hero", ("image"), (req, res) => {
+  const { title, description } = req.body;
+  const image = req.file.filename;
 
-app.put("/api/hero/:id", (req, res) => {
-  const blogId = req.params.id;
-  const { title, description, image } = req.body;
-
-  // Check if at least one field is provided in the request body
-  if (!title && !description && !image) {
-    return res.status(400).json({ error: "No data provided for update." });
-  }
-
-  // Construct the update object with provided fields
-  const updateObject = {};
-  if (title) updateObject.title = title;
-  if (description) updateObject.description = description;
-  if (image) updateObject.image = image;
-
-  // Update the blog post in the database
-  Blog.findByIdAndUpdate(blogId, updateObject, { new: true })
-    .then((updatedBlog) => {
-      if (!updatedBlog) {
-        return res.status(404).json({ error: "Blog post not found." });
-      }
-      res.json(updatedBlog);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error." });
-    });
-});
-
-
-app.post("/api/hero", (req, res) => {
-  const { title, description, image } = req.body;
-
-  // Check if all required fields are provided in the request body
   if (!title || !description || !image) {
     return res.status(400).json({ error: "Missing required fields for creating a new blog post." });
   }
 
-  // Create a new blog post
   const newBlog = new Blog({
     title,
     description,
     image,
   });
 
-  // Save the new blog post to the database
   newBlog.save()
     .then((createdBlog) => {
-      res.status(201).json(createdBlog);
+      const blogWithUrl = {
+        ...createdBlog._doc,
+        image: `/uploads/${createdBlog.image}`,
+      };
+
+      res.status(201).json(blogWithUrl);
     })
     .catch((error) => {
       console.error(error);
@@ -102,11 +87,9 @@ app.post("/api/hero", (req, res) => {
     });
 });
 
-
 app.delete("/api/hero/:id", (req, res) => {
   const blogId = req.params.id;
 
-  // Delete the blog post from the database by its ID
   Blog.findByIdAndDelete(blogId)
     .then((deletedBlog) => {
       if (!deletedBlog) {
@@ -121,6 +104,8 @@ app.delete("/api/hero/:id", (req, res) => {
 });
 
 connect();
+
+app.use("/uploads", express.static("uploads"));
 
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);

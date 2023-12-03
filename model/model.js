@@ -12,7 +12,7 @@ const blogSchema = new mongoose.Schema({
     required:true
   },
   image:{
-    type:String,
+    type:Buffer,
     required: true
   },
 },{timestamps:true});

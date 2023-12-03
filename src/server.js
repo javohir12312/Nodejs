@@ -3,7 +3,12 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
-const Blog = require("../model/model");
+const getAllBlogs = require("../methods/GetAll");
+const getBlogById = require("../methods/GetById");
+const createBlog = require("../methods/CreateBlog");
+const deleteBlog = require("../methods/Delete");
+const updateBlog = require("../methods/UpdateBlog");
+const Audios = require("../model/audio");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -17,7 +22,7 @@ async function connect() {
     });
     console.log("Connected to MongoDB");
   } catch (error) {
-    console.error(error + "sadaaaaaaaaaaaaaaaaa");
+    console.error(error);
   }
 }
 
@@ -37,115 +42,48 @@ const upload = multer({ storage: storage });
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/hero", (req, res) => {
-  Blog.find()
-    .then((result) => {
-      const blogsWithUrls = result.map(blog => {
-        return {
-          ...blog._doc,
-          image: `/uploads/${blog.image}`,
-        };
-      });
-
-      res.send(blogsWithUrls);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.get("/api/hero/:id", (req, res) => {
-  const blogId = req.params.id;
-
-  Blog.findById(blogId)
-    .then((result) => {
-      const blogWithUrl = {
-        ...result._doc,
-        image: `/uploads/${result.image}`,
-      };
-
-      res.send(blogWithUrl);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.post("/api/hero", upload.single("image"), (req, res) => {
-  const { title, description } = req.body;
-  const image = req.file.filename;
-
-  if (!title || !description || !image) {
-    return res.status(400).json({ error: "Missing required fields for creating a new blog post." });
-  }
-
-  const newBlog = new Blog({
-    title,
-    description,
-    image,
-  });
-
-  newBlog.save()
-    .then((createdBlog) => {
-      const blogWithUrl = {
-        ...createdBlog._doc,
-        image: `/uploads/${createdBlog.image}`,
-      };
-
-      res.status(201).json(blogWithUrl);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error." });
-    });
-});
-
-app.delete("/api/hero/:id", (req, res) => {
-  const blogId = req.params.id;
-
-  Blog.findByIdAndDelete(blogId)
-    .then((deletedBlog) => {
-      if (!deletedBlog) {
-        return res.status(404).json({ error: "Blog post not found." });
-      }
-      res.json({ message: "Blog post deleted successfully." });
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error." });
-    });
-});
-
-app.put("/api/hero/:id", (req, res) => {
-  const blogId = req.params.id;
-  const { title, description, image } = req.body;
-
-  // Check if at least one field is provided in the request body
-  if (!title && !description && !image) {
-    return res.status(400).json({ error: "No data provided for update." });
-  }
-
-  // Construct the update object with provided fields
-  const updateObject = {};
-  if (title) updateObject.title = title;
-  if (description) updateObject.description = description;
-  if (image) updateObject.image = image;
-
-  // Update the blog post in the database
-  Blog.findByIdAndUpdate(blogId, updateObject, { new: true })
-    .then((updatedBlog) => {
-      if (!updatedBlog) {
-        return res.status(404).json({ error: "Blog post not found." });
-      }
-      res.json(updatedBlog);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error." });
-    });
-});
+app.get("/api/hero", getAllBlogs);
+app.get("/api/hero/:id", getBlogById);
+app.post("/api/hero", upload.single("image"), createBlog);
+app.delete("/api/hero/:id", deleteBlog);
+app.put("/api/hero/:id", updateBlog);
 
 connect();
+
+// Check if the model already exists before defining it
+const Audio = mongoose.models.Audio || mongoose.model("Audio", Audios);
+
+const audioStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "audio-uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const fileExtension = path.extname(file.originalname);
+    cb(null, "audio-" + uniqueSuffix + fileExtension);
+  },
+});
+
+const uploadAudio = multer({ storage: audioStorage });
+
+app.post("/api/upload/audio", uploadAudio.single("audio"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No audio file provided." });
+    }
+
+    const { title, number } = req.body;
+    const image = req.file.buffer;
+
+    const newAudio = new Audio({ title, number, image, audio: req.file.buffer });
+    await newAudio.save();
+
+    res.status(201).json({ message: "Audio file uploaded and saved successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
 
 app.use("/uploads", express.static("uploads"));
 

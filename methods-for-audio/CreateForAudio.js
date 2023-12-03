@@ -1,24 +1,36 @@
-const Blog = require("../model/model");
+const AudioSchema = require("../model/audio");
 
-app.post('/createAudio', upload.single('audioFile'), async (req, res) => {
-  try {
-    // Faylni yuklab olingan buffer ma'lumotlarni olish
-    const audioBuffer = req.file.buffer;
 
-    // Yangi audio obyektini yaratish
-    const newAudio = new Blog({
-      title: req.body.title,
-      audioData: audioBuffer,
-      number :req.body.numer,
-      image: req.body.image
-    });
+module.exports = function createAudio(req, res) {
+  const { title, number } = req.body;
+  const audios = req.files['audio'];
+  const image = req.files['image'];
 
-    // MongoDB'ga saqlash
-    await newAudio.save();
-
-    res.status(201).send('Audio saved successfully');
-  } catch (error) {
-    console.error('Error saving audio:', error);
-    res.status(500).send('Internal Server Error');
+  if (!title || !number || !audios || !image) {
+    return res.status(400).json({ error: "Missing required fields for creating a new blog post." });
   }
-});
+
+  const audioPaths = audios.map(audio => `/audio-uploads/${audio.filename}`);
+
+  const newBlog = new AudioSchema({
+    title,
+    number,
+    audios: audioPaths,
+    image: `/audio-uploads/${image.filename}`,
+  });
+
+  newBlog.save()
+    .then((createdAudio) => {
+      const blogWithUrls = {
+        ...createdAudio._doc,
+        audios: createdAudio.audios.map(audio => `/audio-uploads/${audio}`),
+        image: `/audio-uploads/${createdAudio.image}`,
+      };
+
+      res.status(201).json(blogWithUrls);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error." });
+    });
+};

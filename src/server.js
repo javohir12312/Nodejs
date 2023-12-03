@@ -8,7 +8,10 @@ const getBlogById = require("../methods/GetById");
 const createBlog = require("../methods/CreateBlog");
 const deleteBlog = require("../methods/Delete");
 const updateBlog = require("../methods/UpdateBlog");
-const Audios = require("../model/audio");
+const CreateForAudio = require("../methods-for-audio/CreateForAudio");
+const getAllAudio = require("../methods-for-audio/getAllAudio");
+const AudioSchema = require("../model/audio")
+
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -37,23 +40,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/hero", getAllBlogs);
-app.get("/api/hero/:id", getBlogById);
-app.post("/api/hero", upload.single("image"), createBlog);
-app.delete("/api/hero/:id", deleteBlog);
-app.put("/api/hero/:id", updateBlog);
-
-connect();
-
-// Check if the model already exists before defining it
-const Audio = mongoose.models.Audio || mongoose.model("Audio", Audios);
-
-const audioStorage = multer.diskStorage({
+const storageAudio = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "audio-uploads/");
   },
@@ -64,29 +51,32 @@ const audioStorage = multer.diskStorage({
   },
 });
 
-const uploadAudio = multer({ storage: audioStorage });
+const uploadImage = multer({ storage: storage });
+const uploadAudio = multer({ storage: storageAudio });
 
-app.post("/api/upload/audio", uploadAudio.single("audio"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No audio file provided." });
-    }
+app.use(cors());
+app.use(express.json());
 
-    const { title, number } = req.body;
-    const image = req.file.buffer;
+app.get("/api/hero", getAllBlogs);
+app.get("/api/audios", getAllAudio);
+app.get("/api/hero/:id", getBlogById);
 
-    const newAudio = new Audio({ title, number, image, audio: req.file.buffer });
-    await newAudio.save();
+app.post("/api/hero", uploadImage.single("image"), createBlog);
 
-    res.status(201).json({ message: "Audio file uploaded and saved successfully." });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error." });
-  }
-});
+// Use uploadAudio for audio uploads
+app.post("/api/audios", uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), CreateForAudio);
+
+app.delete("/api/hero/:id", deleteBlog);
+app.put("/api/hero/:id", updateBlog);
+
+connect();
 
 app.use("/uploads", express.static("uploads"));
+app.use("/audio-uploads", express.static("audio-uploads"));
 
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
 });
+
+
+

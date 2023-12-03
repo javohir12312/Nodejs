@@ -21,6 +21,19 @@ async function connect() {
   }
 }
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const fileExtension = path.extname(file.originalname);
+    cb(null, "image-" + uniqueSuffix + fileExtension);
+  },
+});
+
+const upload = multer({ storage: storage });
+
 app.use(cors());
 app.use(express.json());
 
@@ -30,7 +43,7 @@ app.get("/api/hero", (req, res) => {
       const blogsWithUrls = result.map(blog => {
         return {
           ...blog._doc,
-          image: `/uploads`,
+          image: `/uploads/${blog.image}`,
         };
       });
 
@@ -58,7 +71,7 @@ app.get("/api/hero/:id", (req, res) => {
     });
 });
 
-app.post("/api/hero", ("image"), (req, res) => {
+app.post("/api/hero", upload.single("image"), (req, res) => {
   const { title, description } = req.body;
   const image = req.file.filename;
 

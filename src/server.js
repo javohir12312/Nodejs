@@ -59,7 +59,7 @@ app.use(express.json());
 
 app.get("/api/hero", getAllBlogs);
 app.get("/api/audios", getAllAudio);
-app.get("/api/hero/:id", getBlogById);
+app.get("/api/hero/:id", getBlogById) 
 
 app.post("/api/hero", uploadImage.single("image"), createBlog);
 

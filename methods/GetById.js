@@ -5,10 +5,6 @@ module.exports = function getBlogById(req, res) {
 
   Blog.findById(blogId)
     .then((result) => {
-
-      if(!result){
-        res.send(404).json({ error: "Not found" });
-      }
       const blogWithUrl = {
         ...result._doc,
         image: `/uploads/${result.image}`,

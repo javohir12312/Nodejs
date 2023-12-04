@@ -3,9 +3,14 @@ const AudioSchema = require("../model/audio");
 
 module.exports = function createAudio(req, res) {
   const { title, number } = req.body;
-
   const audios = req.files['audio'];
   const image = req.files['image'];
+
+if (!image || image.length === 0) {
+  return res.status(400).json({ error: "No images uploaded for the 'image' field." });
+}
+
+const firstImage = image[0];
 
   if (!title || !number || !audios || !image) {
     return res.status(400).json({ error: "Missing required fields for creating a new blog post." });
@@ -17,8 +22,11 @@ module.exports = function createAudio(req, res) {
     title,
     number,
     audios: audioPaths,
-    image: `audio-uploads/${image.filename}`,
+    image: `${firstImage.path}`,
   });
+
+  console.log(image+"xaxaxaxaxaxaxaxaxaxaxaxaxax");
+  console.log(image);
   
 
 

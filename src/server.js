@@ -14,18 +14,18 @@ const AudioSchema = require("../model/audio");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
+const url = process.env.MONGODB_URI || "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 
 async function connect() {
   try {
-    const mongoURI = process.env.MONGO_URI || url;
-    await mongoose.connect(mongoURI, {
+    await mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     console.log("Connected to MongoDB");
   } catch (error) {
-    console.error(error);
+    console.error("MongoDB connection error:", error);
+    process.exit(1); // Exit the process if MongoDB connection fails
   }
 }
 
@@ -73,6 +73,20 @@ connect();
 
 app.use("/uploads", express.static("uploads"));
 app.use("/audio-uploads", express.static("audio-uploads"));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  mongoose.connection.close(() => {
+    console.log('MongoDB connection closed.');
+    process.exit(0);
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);

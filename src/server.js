@@ -10,8 +10,7 @@ const deleteBlog = require("../methods/Delete");
 const updateBlog = require("../methods/UpdateBlog");
 const CreateForAudio = require("../methods-for-audio/CreateForAudio");
 const getAllAudio = require("../methods-for-audio/getAllAudio");
-const AudioSchema = require("../model/audio")
-
+const AudioSchema = require("../model/audio");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -19,7 +18,8 @@ const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mon
 
 async function connect() {
   try {
-    await mongoose.connect(url, {
+    const mongoURI = process.env.MONGO_URI || url;
+    await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -77,6 +77,3 @@ app.use("/audio-uploads", express.static("audio-uploads"));
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
 });
-
-
-

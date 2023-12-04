@@ -10,7 +10,7 @@ const audioSchema = new mongoose.Schema({
     required: true,
   },
   audios: {
-    type: [String], // Array of audio paths
+    type: [String],
     required: true,
   },
   image: {

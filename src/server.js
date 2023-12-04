@@ -52,7 +52,12 @@ const storageAudio = multer.diskStorage({
 });
 
 const uploadImage = multer({ storage: storage });
-const uploadAudio = multer({ storage: storageAudio });
+const uploadAudio = multer({
+  storage: storageAudio,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+  },
+});
 
 app.use(cors());
 app.use(express.json());

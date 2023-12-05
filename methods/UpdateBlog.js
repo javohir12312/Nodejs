@@ -1,19 +1,22 @@
-const Blog = require("../model/model")
+const Blog = require("../model/model");
 
-module.exports =  function updateBlog(req, res) {
+module.exports = function updateBlog(req, res) {
   const blogId = req.params.id;
-  const { title, description, image } = req.body;
+  const { title, description } = req.body;
 
-  if (!title && !description && !image) {
+  if (!title && !description) {
     return res.status(400).json({ error: "No data provided for update." });
   }
 
   const updateObject = {};
   if (title) updateObject.title = title;
   if (description) updateObject.description = description;
-  if (image) updateObject.image = image;
 
-  // Update the blog post in the database
+  if (req.files && req.files.image) {
+    const image = req.files.image[0];
+    updateObject.image = image.path; 
+  }
+
   Blog.findByIdAndUpdate(blogId, updateObject, { new: true })
     .then((updatedBlog) => {
       if (!updatedBlog) {
@@ -25,4 +28,4 @@ module.exports =  function updateBlog(req, res) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error." });
     });
-}
+};

@@ -10,7 +10,6 @@ const deleteBlog = require("../methods/Delete");
 const updateBlog = require("../methods/UpdateBlog");
 const CreateForAudio = require("../methods-for-audio/CreateForAudio");
 const getAllAudio = require("../methods-for-audio/getAllAudio");
-const AudioSchema = require("../model/audio");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -25,7 +24,7 @@ async function connect() {
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);
-    process.exit(1); // Exit the process if MongoDB connection fails
+    process.exit(1); 
   }
 }
 
@@ -68,24 +67,22 @@ app.get("/api/hero/:id", getBlogById)
 
 app.post("/api/hero", uploadImage.single("image"), createBlog);
 
-// Use uploadAudio for audio uploads
 app.post("/api/audios", uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), CreateForAudio);
 
 app.delete("/api/hero/:id", deleteBlog);
-app.put("/api/hero/:id", updateBlog);
+app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
+
 
 connect();
 
 app.use("/uploads", express.static("uploads"));
 app.use("/audio-uploads", express.static("audio-uploads"));
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
 
-// Graceful shutdown
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
     console.log('MongoDB connection closed.');

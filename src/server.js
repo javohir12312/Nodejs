@@ -12,7 +12,7 @@ const CreateForAudio = require("../methods-for-audio/CreateForAudio");
 const getAllAudio = require("../methods-for-audio/getAllAudio");
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 const url = process.env.MONGODB_URI || "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 
 async function connect() {

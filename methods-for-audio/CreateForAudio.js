@@ -16,7 +16,7 @@ module.exports = function createAudio(req, res) {
     title,
     number,
     audios: audioPaths,
-    image: `${firstImage.filename}`, 
+    image: `audio-uploads/${firstImage.filename}`, 
   });
 
   console.log("Image Object:", firstImage);

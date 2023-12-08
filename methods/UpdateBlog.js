@@ -15,7 +15,7 @@ module.exports = function updateBlog(req, res) {
   if (req.file) {
     // Assuming you are updating only one image
     const image = req.file;
-    updateObject.image = image.path;
+    updateObject.image = image.filename;
   }
 
   console.log("req.file:", req.file);

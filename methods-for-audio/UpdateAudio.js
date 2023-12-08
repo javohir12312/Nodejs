@@ -1,10 +1,10 @@
-const Blog = require("../model/model");
+const AudioSchema = require("../model/audio");
 
 module.exports = function updateBlog(req, res) {
   const blogId = req.params.id;
   const { title, description } = req.body;
 
-  if (!title && !description && !req.file) {
+  if (!title && !description) {
     return res.status(400).json({ error: "No data provided for update." });
   }
 
@@ -12,14 +12,10 @@ module.exports = function updateBlog(req, res) {
   if (title) updateObject.title = title;
   if (description) updateObject.description = description;
 
-  if (req.file) {
-    // Assuming you are updating only one image
-    const image = req.file;
-    updateObject.image = image.path;
+  if (req.files && req.files.image) {
+    const image = req.files.image[0];
+    updateObject.image = image.path; 
   }
-
-  console.log("req.file:", req.file);
-  console.log("updateObject.image:", updateObject.image);
 
   Blog.findByIdAndUpdate(blogId, updateObject, { new: true })
     .then((updatedBlog) => {

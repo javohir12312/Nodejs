@@ -10,6 +10,7 @@ const deleteBlog = require("../methods/Delete");
 const updateBlog = require("../methods/UpdateBlog");
 const CreateForAudio = require("../methods-for-audio/CreateForAudio");
 const getAllAudio = require("../methods-for-audio/getAllAudio");
+const UpdateAudio = require("../methods-for-audio/UpdateAudio");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -68,6 +69,7 @@ app.get("/api/hero/:id", getBlogById)
 app.post("/api/hero", uploadImage.single("image"), createBlog);
 
 app.post("/api/audios", uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), CreateForAudio);
+app.put("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), UpdateAudio);
 
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);

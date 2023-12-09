@@ -70,8 +70,11 @@ app.get("/api/hero/:id", getBlogById)
 app.post("/api/hero", uploadImage.single("image"), createBlog);
 
 app.post("/api/audios", uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), CreateForAudio);
-app.put("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), UpdateAudio);
-
+app.put("/api/audios/:id", );
+app.put("/api/audios/:id", (req, res) => {
+  console.log("PUT request received:", req.params.id);
+  uploadAudio.fields([{ name: 'audio' }, { name: 'image' }]), UpdateAudio
+});
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
 

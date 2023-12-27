@@ -1,9 +1,11 @@
 const express = require("express");
+const multer = require("multer");
 const AudioSchema = require("../model/audio");
 
 const router = express.Router();
+const upload = multer();  // Create a multer instance without any configuration
 
-router.put("/:id", updateAudio.fields([{ name: 'audio' }, { name: 'image' }]), updateAudio);
+router.put("/:id", upload.fields([{ name: 'audio' }, { name: 'image' }]), updateAudio);
 
 function updateAudio(req, res) {
   const audioId = req.params.id;

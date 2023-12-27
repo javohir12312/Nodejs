@@ -15,8 +15,8 @@ module.exports = function createAudio(req, res) {
   const newBlog = new AudioSchema({
     title,
     number,
-    audios: audioPaths,
-    image: `audio-uploads/${firstImage.filename}`, 
+    audios: `audio-uploads${audioPaths}`,
+    image: `${firstImage.filename}`, 
   });
 
   console.log("Image Object:", firstImage);

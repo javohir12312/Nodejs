@@ -3,16 +3,18 @@ const AudioSchema = require("../model/audio");
 module.exports = function getAllAudios(req, res) {
   AudioSchema.find()
     .then((result) => {
-      const blogsWithUrls = result.map(blog => {
+      const audiosWithUrls = result.map(audio => {
         return {
-          ...blog._doc,
-          image: `/audio-uploads/${blog.image}`,
-          audio: `/audio-uploads/${blog.audio}`,
+          ...audio._doc,
+          image: `/audio-uploads/${audio.image}`,
+          audios: audio.audios.map(a => `${a}`),  // Updated this line
+          audio: audio.audio.map(a => `/audio-uploads/${a}`)     // Updated this line
         };
       });
-      res.send(blogsWithUrls);
+      res.send(audiosWithUrls);
     })
     .catch((err) => {
       console.log(err);
+      res.status(500).json({ error: "Internal Server Error." });
     });
 }

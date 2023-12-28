@@ -14,7 +14,7 @@ module.exports = function UpdateAudio(req, res) {
 
   if (req.files && req.files.image) {
     const image = req.files.image[0];
-    updateObject.image = `/${image.filename}`;
+    updateObject.image = `${image.filename}`;
   }
 
   if (req.files && req.files.audios) {
@@ -24,7 +24,7 @@ module.exports = function UpdateAudio(req, res) {
 
   if (req.files && req.files.audio) {
     const audioFiles = req.files.audio;
-    updateObject.audio = audioFiles.map(audio => `/audio-uploads/${audio.filename}`);
+    updateObject.audio = audioFiles.map(audio => `${audio.filename}`);
   }
 
   Audio.findByIdAndUpdate(audioId, updateObject, { new: true })

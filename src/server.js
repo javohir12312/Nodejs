@@ -14,6 +14,10 @@ const getAllAudio = require("../methods-for-audio/getAllAudio");
 const UpdateAudio = require("../methods-for-audio/UpdateAudio");
 const Audiodelete = require("../methods-for-audio/Audiodelete");
 const getBlogByIdAudios = require("../methods-for-audio/getBlogByIdAudios");
+const getLogo = require("../logoApi/getLogo");
+const createLogo = require("../logoApi/createLogo");
+const DeleteLogo = require("../logoApi/DeleteLogo");
+const { updateLogo } = require("../logoApi/UpdateLogo");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -40,6 +44,15 @@ const storage = multer.diskStorage({
   },
 });
 
+const Logo = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads-logo/"),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "image-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+
 const storageAudio = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "audio-uploads/"),
   filename: (req, file, cb) => {
@@ -49,6 +62,8 @@ const storageAudio = multer.diskStorage({
 });
 
 const uploadImage = multer({ storage });
+const uploadLogo = multer({ storage: Logo });  // Use the correct storage configuration
+
 const uploadAudio = multer({
   storage: storageAudio,
   limits: { fileSize: 100000000 },
@@ -75,8 +90,16 @@ app.post("/api/audios", uploadAudio.fields([{ name: 'audios' }, { name: 'audio' 
 app.put("/api/audios/:id", uploadAudio.fields([{ name: 'audios' }, { name: 'audio' }, { name: 'image' }]), UpdateAudio);
 app.delete("/api/audios/:id", Audiodelete)
 
+// Logo
+app.get("/api/logo",getLogo)
+app.post("/api/logo",uploadLogo.fields([{ name: 'image' }]), createLogo);
+app.delete("/api/logo/:id",DeleteLogo)
+app.put("/api/logo/:id",uploadLogo.fields([{ name: 'image' }]),updateLogo)
+
 // Serve static files
 app.use("/uploads", express.static("uploads"));
+app.use("/uploads-logo", express.static("uploads-logo"));
+
 app.use("/audio-uploads", express.static("audio-uploads"));
 
 // Request logging middleware

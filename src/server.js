@@ -18,11 +18,16 @@ const getLogo = require("../logoApi/getLogo");
 const createLogo = require("../logoApi/createLogo");
 const DeleteLogo = require("../logoApi/DeleteLogo");
 const { updateLogo } = require("../logoApi/UpdateLogo");
+const CreateById = require("../methods-for-audio/CreateById");
+const updateOneAudio = require("../methods-for-audio/updateOneAudio");
+const delteInner = require("../methods-for-audio/DeleteInner");
+const GetInner = require("../methods-for-audio/GetInner");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const url ="mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
+const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 
+// Connect to MongoDB
 async function connect() {
   try {
     await mongoose.connect(url, {
@@ -36,6 +41,9 @@ async function connect() {
   }
 }
 
+connect();
+
+// Multer configurations
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => {
@@ -44,7 +52,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const Logo = multer.diskStorage({
+const LogoStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads-logo/"),
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -52,8 +60,7 @@ const Logo = multer.diskStorage({
   },
 });
 
-
-const storageAudio = multer.diskStorage({
+const audioStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "audio-uploads/"),
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -62,44 +69,41 @@ const storageAudio = multer.diskStorage({
 });
 
 const uploadImage = multer({ storage });
-const uploadLogo = multer({ storage: Logo });  // Use the correct storage configuration
+const uploadLogo = multer({ storage: LogoStorage });
+const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
+const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
-const uploadAudio = multer({
-  storage: storageAudio,
-  limits: { fileSize: 100000000 },
-});
-
-// Middleware setup
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
 // Routes
-
-// Hero
 app.get("/api/hero", getAllBlogs);
 app.get("/api/hero/:id", getBlogById);
 app.post("/api/hero", uploadImage.single("image"), createBlog);
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
 
-
-// Audios
 app.get("/api/audios", getAllAudio);
 app.get("/api/audios/:id", getBlogByIdAudios);
-app.post("/api/audios", uploadAudio.fields([{ name: 'audios' }, { name: 'audio' }, { name: 'image' }]), CreateForAudio);
-app.put("/api/audios/:id", uploadAudio.fields([{ name: 'audios' }, { name: 'audio' }, { name: 'image' }]), UpdateAudio);
-app.delete("/api/audios/:id", Audiodelete)
+app.get("/api/audios/:id/:id2", GetInner);
+app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById);
+app.post("/api/audios", uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), CreateForAudio);
+app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), UpdateAudio);
 
-// Logo
-app.get("/api/logo",getLogo)
-app.post("/api/logo",uploadLogo.fields([{ name: 'image' }]), createLogo);
-app.delete("/api/logo/:id",DeleteLogo)
-app.put("/api/logo/:id",uploadLogo.fields([{ name: 'image' }]),updateLogo)
+app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudio);
 
-// Serve static files
+app.delete("/api/audios/:id", Audiodelete);delteInner
+app.delete("/api/audios/:id/:id2", delteInner);
+
+app.get("/api/logo", getLogo);
+app.post("/api/logo", uploadLogo.fields([{ name: 'image' }]), createLogo);
+app.delete("/api/logo/:id", DeleteLogo);
+app.put("/api/logo/:id", uploadLogo.fields([{ name: 'image' }]), updateLogo);
+
+// Static file serving
 app.use("/uploads", express.static("uploads"));
 app.use("/uploads-logo", express.static("uploads-logo"));
-
 app.use("/audio-uploads", express.static("audio-uploads"));
 
 // Request logging middleware
@@ -108,8 +112,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to MongoDB and start server
-connect();
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
 });
@@ -121,3 +124,9 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
+
+// // Function for creating audio
+// const AudioSchema = require("../model/audio");
+// module.exports = function createAudio(req, res) {
+  
+// };

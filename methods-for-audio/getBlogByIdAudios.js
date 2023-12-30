@@ -13,8 +13,6 @@ module.exports = function getAllAudios(req, res) {
       const audiosWithUrls = {
         ...result._doc,
         image: `/audio-uploads/${result.image}`,
-        audios: result.audios.map(a => `${a}`),  // Ensure this is an array on your schema
-        audio: result.audio.map(a => `/audio-uploads/${a}`)
       };
 
       res.send(audiosWithUrls);

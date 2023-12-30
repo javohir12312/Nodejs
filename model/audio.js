@@ -1,26 +1,46 @@
 const mongoose = require("mongoose");
 
-const audioSchema = new mongoose.Schema({
+// Define the nested audio schema
+const nestedAudioSchema = new mongoose.Schema({
+  id:{
+  type:String,
+  required:true
+  },
   title: {
     type: String,
     required: true,
   },
-  number: {
+  description: {
+    type: String,
+  },
+  audio: {
     type: String,
     required: true,
   },
-  audios: {
-    type: [String],
+});
+
+// Main Audio Schema
+const audioSchema = new mongoose.Schema({
+  firstname: {
+    type: String,
+    required: true,
+  },
+  lastname: {
+    type: String,
     required: true,
   },
   image: {
     type: String,
     required: true,
   },
-  audio:{
-    type:[String],
-    required:true,
-  }
+  smallaudio: {
+    type: String,
+    required: true,
+  },
+  audios: {
+    type: [nestedAudioSchema], // This specifies an array of objects following the nestedAudioSchema
+    required: false,
+  },
 });
 
 module.exports = mongoose.model("Audio", audioSchema);

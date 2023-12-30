@@ -1,33 +1,27 @@
 const AudioSchema = require("../model/audio");
 
 module.exports = function createAudio(req, res) {
-  const { title, number } = req.body;
-  const audios = req.files['audios'] ? req.files['audios'].map(file => `/audio-uploads/${file.filename}`) : [];
-  const audioFile = req.files['audio'] ? `${req.files['audio'][0].filename}` : null;
+  const { firstname, lastname } = req.body;
+  const smallaudioFile = req.files['smallaudio'] ? `${req.files['smallaudio'][0].filename}` : null;
   const imageFile = req.files['image'] ? `${req.files['image'][0].filename}` : null;
-  console.log(req.body);
 
-  if (!title || !number || audios.length === 0 || !audioFile || !imageFile) {
+  // Check for required fields
+  if (!firstname || !lastname || !smallaudioFile || !imageFile) {
     return res.status(400).json({ error: "Missing required fields for creating a new audio entry." });
   }
 
+  // Construct the new AudioSchema instance
   const newAudioEntry = new AudioSchema({
-    title,
-    number,
-    audios: [...audios],
-    audio: audioFile,
-    image: imageFile
+    firstname,
+    lastname,
+    smallaudio: `${smallaudioFile}`,
+    image: imageFile // Assign the image filename here
   });
 
+  // Save to MongoDB
   newAudioEntry.save()
     .then((createdAudio) => {
-      const audioWithUrls = {
-        ...createdAudio._doc,
-        audios: createdAudio.audios.map(audio => `${audio}`),
-        audio: `${createdAudio.audio}`,
-        image: `${createdAudio.image}`
-      };
-      res.status(201).json(audioWithUrls);
+      res.status(201).json(createdAudio);
     })
     .catch((error) => {
       console.error(error);

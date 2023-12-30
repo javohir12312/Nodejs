@@ -22,7 +22,11 @@ const CreateById = require("../methods-for-audio/CreateById");
 const updateOneAudio = require("../methods-for-audio/updateOneAudio");
 const delteInner = require("../methods-for-audio/DeleteInner");
 const GetInner = require("../methods-for-audio/GetInner");
-
+const createPhone = require('../phone-number-method/createPhoneNumber');
+const getAll = require("../phone-number-method/GetAllNumber")
+const getPhoneById = require("../phone-number-method/GetByid")
+const updatePhoneById = require("../phone-number-method/Update")
+const deletePhoneById = require("../phone-number-method/deletePhone")
 const app = express();
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
@@ -90,16 +94,22 @@ app.get("/api/audios/:id/:id2", GetInner);
 app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById);
 app.post("/api/audios", uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), CreateForAudio);
 app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), UpdateAudio);
-
 app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudio);
-
 app.delete("/api/audios/:id", Audiodelete);delteInner
 app.delete("/api/audios/:id/:id2", delteInner);
 
+// Logo
 app.get("/api/logo", getLogo);
 app.post("/api/logo", uploadLogo.fields([{ name: 'image' }]), createLogo);
 app.delete("/api/logo/:id", DeleteLogo);
 app.put("/api/logo/:id", uploadLogo.fields([{ name: 'image' }]), updateLogo);
+
+// Number
+app.post('/api/phone-number', createPhone);
+app.get('/api/phone-number', getAll);
+app.get('/api/phone-number/:id', getPhoneById);
+app.put('/api/phone-number/:id', updatePhoneById);
+app.delete('/api/phone-number/:id', deletePhoneById);
 
 // Static file serving
 app.use("/uploads", express.static("uploads"));

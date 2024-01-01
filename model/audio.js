@@ -14,7 +14,7 @@ const nestedAudioSchema = new mongoose.Schema({
     type: String,
   },
   audio: {
-    type: String,
+    type: Buffer,
     required: true,
   },
 });

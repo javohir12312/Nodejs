@@ -8,7 +8,7 @@ module.exports = function getPhoneById (req, res) {
       if (!phone) {
         return res.status(404).json({ error: "Phone number not found." });
       }
-      res.status(200).json(phone);
+      res.status(200).json(phone,instagram);
     })
     .catch((error) => {
       console.error(error);

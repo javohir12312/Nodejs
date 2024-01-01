@@ -2,7 +2,7 @@ const Phone = require("../model/phoneNumber");
 module.exports = function getAllPhones (req, res) {
   Phone.find()
     .then((phones) => {
-      res.status(200).json(phones);
+      res.status(200).json(phones,instagram);
     })
     .catch((error) => {
       console.error(error);

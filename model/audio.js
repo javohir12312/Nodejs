@@ -30,11 +30,11 @@ const audioSchema = new mongoose.Schema({
     required: true,
   },
   image: {
-    type: String,
+    type: Buffer,
     required: true,
   },
   smallaudio: {
-    type: String,
+    type: Buffer,
     required: true,
   },
   audios: {

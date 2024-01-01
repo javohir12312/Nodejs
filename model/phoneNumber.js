@@ -4,6 +4,9 @@ const Phoneschema = new mongoose.Schema({
   number: {
     type: String,
     required: true,
+  },
+  instagram:{
+    type: String,
   }
 }, { timestamps: true });
 

@@ -1,8 +1,8 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const AudioSchema = require("../model/audio");
 
-module.exports = function createAudio(req, res) {
+module.exports = async function createAudio(req, res) {
   const { firstname, lastname } = req.body;
   const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0].path : null;
   const imageFile = req.files['image'] ? req.files['image'][0].path : null;
@@ -11,36 +11,36 @@ module.exports = function createAudio(req, res) {
     return res.status(400).json({ error: "Missing required fields for creating a new audio entry." });
   }
 
-  // Function to read file and return as Buffer
-  const readFileToBuffer = (filePath) => {
+  const readFileToBuffer = async (filePath) => {
     try {
-      return fs.readFileSync(filePath);
+      return await fs.readFile(filePath);
     } catch (error) {
       console.error(`Error reading file from path ${filePath}:`, error);
       return null;
     }
   };
 
-  const smallaudioBuffer = readFileToBuffer(smallaudioFile);
-  const imageBuffer = readFileToBuffer(imageFile);
+  const [smallaudioBuffer, imageBuffer] = await Promise.all([
+    readFileToBuffer(smallaudioFile),
+    readFileToBuffer(imageFile)
+  ]);
 
   if (!smallaudioBuffer || !imageBuffer) {
     return res.status(500).json({ error: "Failed to read file data." });
   }
 
-  const newAudioEntry = new AudioSchema({
-    firstname,
-    lastname,
-    smallaudio: smallaudioBuffer,
-    image: imageBuffer
-  });
-
-  newAudioEntry.save()
-    .then((createdAudio) => {
-      res.status(201).json(createdAudio);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Failed to save the audio entry." });
+  try {
+    const newAudioEntry = new AudioSchema({
+      firstname,
+      lastname,
+      smallaudio: smallaudioBuffer,
+      image: imageBuffer
     });
+
+    const createdAudio = await newAudioEntry.save();
+    res.status(201).json(createdAudio);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save the audio entry.", detailedError: error.message });
+  }
 };

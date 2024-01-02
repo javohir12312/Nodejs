@@ -1,35 +1,52 @@
+const fs = require('fs');
 const Blog = require("../model/model");
 
-module.exports = function updateBlog(req, res) {
+module.exports = async function updateBlog(req, res) {
   const blogId = req.params.id;
   const { title, description } = req.body;
+  const image = req.file ? req.file.path : null;
 
-  if (!title && !description && !req.file) {
+  // Check for no data provided for update
+  if (!title && !description && !image) {
     return res.status(400).json({ error: "No data provided for update." });
   }
 
-  const updateObject = {};
-  if (title) updateObject.title = title;
-  if (description) updateObject.description = description;
+  try {
+    const blogToUpdate = await Blog.findById(blogId);
 
-  if (req.file) {
-    // Assuming you are updating only one image
-    const image = req.file;
-    updateObject.image = image.filename;
+    if (!blogToUpdate) {
+      return res.status(404).json({ error: "Blog post not found." });
+    }
+
+    const updateObject = {};
+
+    if (title) updateObject.title = title;
+    if (description) updateObject.description = description;
+    if (image) {
+      const imageBuffer = fs.readFileSync(image); // Read the image file into a buffer
+      updateObject.image = imageBuffer;
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(blogId, updateObject, { new: true });
+
+    if (!updatedBlog) {
+      return res.status(404).json({ error: "Failed to update blog post." });
+    }
+
+    const blogWithUrl = {
+      ...updatedBlog._doc,
+      image: `/uploads/${updatedBlog.image}`, // Assuming the image path is saved as a string
+    };
+
+    res.json(blogWithUrl);
+
+  } catch (error) {
+    console.error(error);
+
+    if (error.kind === 'ObjectId') {
+      return res.status(400).json({ error: 'Invalid ID format.' });
+    }
+
+    return res.status(500).json({ error: 'Internal Server Error.' });
   }
-
-  console.log("req.file:", req.file);
-  console.log("updateObject.image:", updateObject.image);
-
-  Blog.findByIdAndUpdate(blogId, updateObject, { new: true })
-    .then((updatedBlog) => {
-      if (!updatedBlog) {
-        return res.status(404).json({ error: "Blog post not found." });
-      }
-      res.json(updatedBlog);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error." });
-    });
 };

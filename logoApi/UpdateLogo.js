@@ -1,13 +1,27 @@
-const Logo =require("../model/logo")
+const fs = require('fs');  // Import the fs module
+const Logo = require("../model/logo");
+
 module.exports.updateLogo = async function(req, res) {
   const { id } = req.params; 
   const { title } = req.body;
-  const image = req.files && req.files.image ? req.files.image[0].filename : undefined;
-  console.log(image,title,id);
+  const image = req.files && req.files.image ? req.files.image[0].path : undefined;
+  console.log(image, title, id);
+
   if (!title && !image) {
     return res.status(400).json({ err: "Nothing to update." });
   }
 
+  const readFileToBuffer = (filePath) => {
+    try {
+      return fs.readFileSync(filePath);
+    } catch (error) {
+      console.error(`Error reading file from path ${filePath}:`, error);
+      return null;
+    }
+  };
+
+  const imageBuffer = readFileToBuffer(image);
+  
   try {
     let logo = await Logo.findById(id);
 
@@ -20,7 +34,7 @@ module.exports.updateLogo = async function(req, res) {
     }
 
     if (image) {
-      logo.image = image;
+      logo.image = imageBuffer;
     }
 
     await logo.save();
@@ -28,7 +42,7 @@ module.exports.updateLogo = async function(req, res) {
     res.status(200).json({
       id: logo._id,
       title: logo.title,
-      image: `/uploads-logo/${logo.image}`
+      image: `/uploads-logo/${image}`  // Assuming the image filename is stored in the database
     });
 
   } catch (error) {
@@ -36,4 +50,3 @@ module.exports.updateLogo = async function(req, res) {
     res.status(500).json({ error: "Internal Server Error." });
   }
 };
-

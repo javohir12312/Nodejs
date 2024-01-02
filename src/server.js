@@ -37,6 +37,8 @@ async function connect() {
     await mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000,
+      
     });
     console.log("Connected to MongoDB");
   } catch (error) {
@@ -76,6 +78,7 @@ const uploadImage = multer({ storage });
 const uploadLogo = multer({ storage: LogoStorage });
 const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
+
 
 // Middlewares
 app.use(cors());

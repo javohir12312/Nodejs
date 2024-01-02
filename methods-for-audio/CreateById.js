@@ -1,54 +1,70 @@
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require('uuid');
 const AudioSchema = require("../model/audio");
+const fs = require('fs');
+const path = require('path');
 
-module.exports = async function createAudio(req, res) {
+module.exports = async function createInnerAudio(req, res) {
   const { title, description } = req.body;
-  const audioFile = req.files && req.files['audio'] ? `/audio-uploads/${req.files['audio'][0].filename}` : null;
-  const blogId = req.params.id;
+  const audioFilePath = req.files && req.files['audio'] ? req.files['audio'][0].path : null;
+  const mainAudioId = req.params.id; // ID of the main audio document
 
-  if (!title || !description || !audioFile) {
-    return res.status(400).json({ error: "Missing required fields for creating a new audio entry." });
+  if (!title || !description || !audioFilePath) {
+    return res.status(400).json({ error: "Missing required fields for creating a new inner audio entry." });
   }
 
   try {
-    // Find the blog post by ID
-    const blog = await AudioSchema.findById(blogId);
+    // Find the main audio document by ID
+    const mainAudio = await AudioSchema.findById(mainAudioId);
   
-    if (!blog) {
-      return res.status(404).json({ error: "Blog post not found." });
+    if (!mainAudio) {
+      return res.status(404).json({ error: "Main Audio document not found." });
     }
 
-    // Generate a unique ID for the audio entry
-    const audioId = uuidv4();
-    
-    // Create a new audio entry associated with the found blog post
-    const newAudioEntry = {
-      id: audioId,
-      title: title,
-      description: description,
-      audio: audioFile
+    // Function to read file and return as Buffer
+    const readFileToBuffer = (filePath) => {
+      try {
+        return fs.readFileSync(filePath);
+      } catch (error) {
+        console.error(`Error reading file from path ${filePath}:`, error);
+        return null;
+      }
     };
 
-    // Push the new audio entry into the 'audios' array of the blog post
-    blog.audios.push(newAudioEntry);
+    // Read audio file to buffer
+    const audioBuffer = readFileToBuffer(audioFilePath);
 
-    // Log the updated blog before saving to ensure 'id' is set correctly
-    console.log("Updated Blog with Audio Entry:", blog);
+    if (!audioBuffer) {
+      return res.status(500).json({ error: "Failed to read audio file data." });
+    }
+    
+    // Generate a unique ID for the inner audio entry
+    const innerAudioId = uuidv4();
+    
+    // Create a new inner audio entry
+    const newInnerAudioEntry = {
+      id: innerAudioId,
+      title: title,
+      description: description,
+      audio: audioBuffer
+    };
 
-    // Save the updated blog post (with the new audio entry)
-    const updatedBlog = await blog.save();
+    // Push the new inner audio entry into the 'audios' array of the main audio document
+    mainAudio.audios.push(newInnerAudioEntry);
+
+    // Save the updated main audio document (with the new inner audio entry)
+    const updatedMainAudio = await mainAudio.save();
   
-    // Check if the updatedBlog exists and return it
-    if (updatedBlog) {
-      res.status(201).json(updatedBlog);
+    // Check if the updatedMainAudio exists and return it
+    if (updatedMainAudio) {
+      res.status(201).json(updatedMainAudio);
     } else {
-      throw new Error("Failed to save the audio entry.");
+      throw new Error("Failed to save the inner audio entry.");
     }
   } catch (error) {
     console.error(error);
     if (error.kind === "ObjectId") {
-      return res.status(400).json({ error: "Invalid blog ID format." });
+      return res.status(400).json({ error: "Invalid main audio ID format." });
     }
     res.status(500).json({ error: "Internal Server Error." });
   }

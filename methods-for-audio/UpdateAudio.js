@@ -1,38 +1,53 @@
+const fs = require('fs');
+const path = require('path');
 const AudioSchema = require("../model/audio");
 
-module.exports = async function updateAudio(req, res) {
-  const { id } = req.params; // Extracting the ID from the request parameters
+module.exports = function updateAudio(req, res) {
+  const audioId = req.params.id; // Assuming you'll send the audio ID as a parameter in the route
   const { firstname, lastname } = req.body;
-  const smallaudioFile = req.files['smallaudio'] ? `${req.files['smallaudio'][0].filename}` : null;
-  const imageFile = req.files['image'] ? `${req.files['image'][0].filename}` : null;
+  const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0].path : null;
+  const imageFile = req.files['image'] ? req.files['image'][0].path : null;
 
-  try {
-    // Find the audio entry by its ID
-    const audioEntry = await AudioSchema.findById(id);
-
-    // If audio entry doesn't exist, return 404 error
-    if (!audioEntry) {
-      return res.status(404).json({ error: 'Audio entry not found.' });
-    }
-
-    // Update the audio entry fields if provided in the request body
-    if (firstname) audioEntry.firstname = firstname;
-    if (lastname) audioEntry.lastname = lastname;
-    if (smallaudioFile) audioEntry.smallaudio = smallaudioFile;
-    if (imageFile) audioEntry.image = imageFile;
-
-    // Save the updated audio entry
-    const updatedAudioEntry = await audioEntry.save();
-
-    // Return the updated audio entry in the response
-    res.status(200).json(updatedAudioEntry);
-  } catch (error) {
-    console.error(error);
-    // Handle different types of errors (e.g., ObjectID error)
-    if (error.kind === 'ObjectId') {
-      return res.status(400).json({ error: 'Invalid audio entry ID format.' });
-    }
-    // Return a generic 500 Internal Server Error if any other error occurs
-    res.status(500).json({ error: 'Internal Server Error. Failed to update the audio entry.' });
+  if (!firstname || !lastname || (!smallaudioFile && !imageFile)) {
+    return res.status(400).json({ error: "Missing required fields for updating the audio entry." });
   }
+
+  // Function to read file and return as Buffer
+  const readFileToBuffer = (filePath) => {
+    try {
+      return fs.readFileSync(filePath);
+    } catch (error) {
+      console.error(`Error reading file from path ${filePath}:`, error);
+      return null;
+    }
+  };
+
+  const smallaudioBuffer = smallaudioFile ? readFileToBuffer(smallaudioFile) : null;
+  const imageBuffer = imageFile ? readFileToBuffer(imageFile) : null;
+
+  if ((!smallaudioBuffer && smallaudioFile) || (!imageBuffer && imageFile)) {
+    return res.status(500).json({ error: "Failed to read file data." });
+  }
+
+  // Find the existing audio by ID and update its fields
+  AudioSchema.findByIdAndUpdate(
+    audioId,
+    {
+      firstname,
+      lastname,
+      ...(smallaudioBuffer && { smallaudio: smallaudioBuffer }),
+      ...(imageBuffer && { image: imageBuffer })
+    },
+    { new: true } // This ensures that the updated document is returned
+  )
+    .then((updatedAudio) => {
+      if (!updatedAudio) {
+        return res.status(404).json({ error: 'Audio not found' });
+      }
+      res.status(200).json(updatedAudio); // Return the updated audio document
+    })
+    .catch((error) => {
+      console.error('Error updating audio:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    });
 };

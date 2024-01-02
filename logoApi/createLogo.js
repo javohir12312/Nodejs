@@ -1,18 +1,28 @@
 const Logo = require("../model/logo");
+const fs = require("fs");
 
 module.exports = function createLogo(req, res) {
   const { title } = req.body;
-  const image = req.files && req.files.image ? req.files.image[0].filename : undefined;
+  const image = req.files && req.files.image ? req.files.image[0].path : undefined;
 
   console.log("Received request with fields:", req.files);
 
   if (!title || !image) {
     return res.status(400).json({ err: "Missing required fields for creating a new logo." });
   }
+  const readFileToBuffer = (filePath) => {
+    try {
+      return fs.readFileSync(filePath);
+    } catch (error) {
+      console.error(`Error reading file from path ${filePath}:`, error);
+      return null;
+    }
+  };
 
+  const imageBuffer = readFileToBuffer(image);
   const newLogo = new Logo({
     title,
-    image: image,
+    image: imageBuffer,
   });
 
   newLogo.save()

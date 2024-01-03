@@ -26,12 +26,14 @@ const createPhone = require('../phone-number-method/createPhoneNumber');
 const getAll = require("../phone-number-method/GetAllNumber")
 const getPhoneById = require("../phone-number-method/GetByid")
 const updatePhoneById = require("../phone-number-method/Update")
-const deletePhoneById = require("../phone-number-method/deletePhone")
+const deletePhoneById = require("../phone-number-method/deletePhone");
+const deleteAllFilesFromUploadsFolder = require("./helpers");
 const app = express();
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 
 // Connect to MongoDB
+deleteAllFilesFromUploadsFolder()
 async function connect() {
   try {
     await mongoose.connect(url, {

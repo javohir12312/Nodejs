@@ -19,14 +19,18 @@ module.exports = function getAllBlogs(req, res) {
         const uploadDir = path.join(__dirname, '..', 'uploads-logo');
 
         let image = ""
-        if (blog.image && blog.image.buffer) {
-          image = `image-${blog._id}.png`;
-          const imageBufferData = arrayBufferToBuffer(blog.image.buffer);
-          const fullPath = path.join(uploadDir, image);
-          try {
-            fs.writeFileSync(fullPath, imageBufferData, 'binary');
-          } catch (error) {
-            console.error(`Error writing image for audio ${blog._id}: ${error.message}`);
+        const path =  path.join(uploadDir, `smallaudio-${sound._id}.mp3`)
+        if(!fs.existsSync(path)){
+          if (blog.image && blog.image.buffer) {
+            image = `image-${blog._id}.png`;
+            const imageBufferData = arrayBufferToBuffer(blog.image.buffer);
+            const fullPath = path.join(uploadDir, image);
+            try {
+              fs.writeFileSync(fullPath, imageBufferData, 'binary');
+            } catch (error) {
+              image = `smallaudio-${sound._id}.mp3`
+              console.error(`Error writing image for audio ${blog._id}: ${error.message}`);
+            }
           }
         }
         return {

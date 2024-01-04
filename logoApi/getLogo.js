@@ -1,5 +1,5 @@
-const path  = require("path");
-const  fs  = require("fs");
+const pathModule = require("path"); // Renamed to pathModule to avoid conflict with later usage
+const fs = require("fs");
 const Logo = require("../model/logo");
 
 function arrayBufferToBuffer(arrayBuffer) {
@@ -16,19 +16,19 @@ module.exports = function getAllBlogs(req, res) {
     .then((result) => {
       const blogsWithUrls = result.map(blog => {
 
-        const uploadDir = path.join(__dirname, '..', 'uploads-logo');
+        const uploadDir = pathModule.join(__dirname, '..', 'uploads-logo');
 
-        let image = ""
-        const path =  path.join(uploadDir, `smallaudio-${sound._id}.mp3`)
-        if(!fs.existsSync(path)){
+        let image = "";
+        const imagePath = pathModule.join(uploadDir, `image-${blog._id}.mp3`); // Renamed path to imagePath
+        if (!fs.existsSync(imagePath)) {
           if (blog.image && blog.image.buffer) {
             image = `image-${blog._id}.png`;
             const imageBufferData = arrayBufferToBuffer(blog.image.buffer);
-            const fullPath = path.join(uploadDir, image);
+            const fullPath = pathModule.join(uploadDir, image);
             try {
               fs.writeFileSync(fullPath, imageBufferData, 'binary');
             } catch (error) {
-              image = `smallaudio-${sound._id}.mp3`
+              image = `smallaudio-${blog._id}.mp3`;
               console.error(`Error writing image for audio ${blog._id}: ${error.message}`);
             }
           }
@@ -44,5 +44,4 @@ module.exports = function getAllBlogs(req, res) {
     .catch((err) => {
       console.log(err);
     });
-}
-
+};

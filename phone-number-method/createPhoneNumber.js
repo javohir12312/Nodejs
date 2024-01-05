@@ -3,6 +3,11 @@ const Phone = require("../model/phoneNumber");
 module.exports = function createPhone(req, res) {
   const { number, instagram } = req.body;
   console.log(req.body);
+  const existingBlog = Phone.findOne();
+
+  if (existingBlog) {
+    return res.status(400).json({ error: "A blog post already exists. Cannot create another one." });
+  }
 
   if (!number) {
     return res.status(400).json({ error: "Phone number is required." });

@@ -7,6 +7,12 @@ module.exports = function createLogo(req, res) {
 
   console.log("Received request with fields:", req.files);
 
+  const existingBlog = Logo.findOne();
+
+  if (existingBlog) {
+    return res.status(400).json({ error: "A blog post already exists. Cannot create another one." });
+  }
+
   if (!title || !image) {
     return res.status(400).json({ err: "Missing required fields for creating a new logo." });
   }

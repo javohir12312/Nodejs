@@ -1,53 +1,75 @@
-const fs = require('fs');
-const path = require('path');
+const AWS = require('aws-sdk');
+const fs = require('fs').promises;
+const { v4: uuidv4 } = require('uuid');
 const AudioSchema = require("../model/audio");
 
-module.exports = function updateAudio(req, res) {
-  const audioId = req.params.id; // Assuming you'll send the audio ID as a parameter in the route
+
+const secretAccessKey = "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U";
+const accessKeyId = "DO00RZZQCCEHPQH448HK";
+
+AWS.config.update({
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+  region: 'us-east-1',
+  endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
+  s3ForcePathStyle: true,
+});
+
+const s3 = new AWS.S3();
+
+const uploadToS3 = async (file, fileType) => {
+  try {
+    const fileContent = await fs.readFile(file.path);
+    const params = {
+      Bucket: 'audio-uploads',
+      Key: `${uuidv4()}.${fileType}`,
+      Body: fileContent,
+      ACL: 'public-read',
+    };
+    const uploadedData = await s3.upload(params).promise();
+    console.log('Uploaded to S3:', uploadedData.Location);
+    return uploadedData.Location;
+  } catch (error) {
+    console.error(`Error uploading file ${file.originalname} to S3:`, error);
+    throw error;
+  }
+};
+
+module.exports = async function updateAudio(req, res) {
+  const audioId = req.params.id; // Assuming you have audio ID in the request parameters
   const { firstname, lastname } = req.body;
-  const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0].path : null;
-  const imageFile = req.files['image'] ? req.files['image'][0].path : null;
+  const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0] : null;
+  const imageFile = req.files['image'] ? req.files['image'][0] : null;
 
-  if (!firstname || !lastname || (!smallaudioFile && !imageFile)) {
-    return res.status(400).json({ error: "Missing required fields for updating the audio entry." });
+  if (!firstname || !lastname) {
+    return res.status(400).json({ error: 'Missing required fields for updating the audio entry.' });
   }
 
-  // Function to read file and return as Buffer
-  const readFileToBuffer = (filePath) => {
-    try {
-      return fs.readFileSync(filePath);
-    } catch (error) {
-      console.error(`Error reading file from path ${filePath}:`, error);
-      return null;
-    }
-  };
-
-  const smallaudioBuffer = smallaudioFile ? readFileToBuffer(smallaudioFile) : null;
-  const imageBuffer = imageFile ? readFileToBuffer(imageFile) : null;
-
-  if ((!smallaudioBuffer && smallaudioFile) || (!imageBuffer && imageFile)) {
-    return res.status(500).json({ error: "Failed to read file data." });
-  }
-
-  // Find the existing audio by ID and update its fields
-  AudioSchema.findByIdAndUpdate(
-    audioId,
-    {
+  try {
+    let updatedFields = {
       firstname,
       lastname,
-      ...(smallaudioBuffer && { smallaudio: smallaudioBuffer }),
-      ...(imageBuffer && { image: imageBuffer })
-    },
-    { new: true } // This ensures that the updated document is returned
-  )
-    .then((updatedAudio) => {
-      if (!updatedAudio) {
-        return res.status(404).json({ error: 'Audio not found' });
-      }
-      res.status(200).json(updatedAudio); // Return the updated audio document
-    })
-    .catch((error) => {
-      console.error('Error updating audio:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    });
+    };
+
+    if (smallaudioFile) {
+      const smallaudioURL = await uploadToS3(smallaudioFile, 'mp3');
+      updatedFields.smallaudio = smallaudioURL;
+    }
+
+    if (imageFile) {
+      const imageURL = await uploadToS3(imageFile, 'png');
+      updatedFields.image = imageURL;
+    }
+
+    const updatedAudio = await AudioSchema.findByIdAndUpdate(audioId, updatedFields, { new: true });
+
+    if (!updatedAudio) {
+      return res.status(404).json({ error: 'Audio not found.' });
+    }
+
+    res.status(200).json(updatedAudio);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to process the request.', detailedError: error.message });
+  }
 };

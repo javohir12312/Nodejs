@@ -1,67 +1,85 @@
-const fs = require('fs');
+const AWS = require('aws-sdk');
+const fs = require('fs').promises;
+const { v4: uuidv4 } = require('uuid');
 const AudioSchema = require("../model/audio");
 
-const updateOneAudio = async (req, res) => {
-  const { id, id2 } = req.params;
-  const { title, description } = req.body;
-  const audioPath = req.files && req.files['audio'] ? req.files['audio'][0].path : null;
+// AWS Configuration
+const secretAccessKey = "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U";
+const accessKeyId = "DO00RZZQCCEHPQH448HK";
+AWS.config.update({
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+  region: 'us-east-1',
+  endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
+  s3ForcePathStyle: true,
+});
 
-  console.log(id, id2);
+const s3 = new AWS.S3();
 
+const uploadToS3 = async (file) => {
   try {
-    // Find the blog post by ID
-    const blog = await AudioSchema.findById(id);
-    
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog post not found.' });
+    // Check if file exists at the specified path
+    const exists = await fs.access(file.path).then(() => true).catch(() => false);
+    if (!exists) {
+      throw new Error('File not found at the specified path.');
     }
 
-    // Function to read file and return as Buffer
-    const readFileToBuffer = (filePath) => {
-      try {
-        return fs.readFileSync(filePath);
-      } catch (error) {
-        console.error(`Error reading file from path ${filePath}:`, error);
-        return null;
-      }
+    const fileContent = await fs.readFile(file.path);
+    const params = {
+      Bucket: 'audio-uploads',
+      Key: `${uuidv4()}.mp3`,
+      Body: fileContent,
+      ACL: 'public-read',
     };
-
-    // Find the audio entry within the blog's audios array
-    const audioEntry = blog.audios.find(audio => audio.id === id2);
-    const audioBuffer = audioPath ? readFileToBuffer(audioPath) : null;
-    
-    if (!audioEntry) {
-      return res.status(404).json({ error: 'Audio entry not found.' });
-    }
-
-    // Update fields if provided
-    if (title) audioEntry.title = title;
-    if (description) audioEntry.description = description;
-    if (audioPath && audioBuffer) {
-      // Assuming audioEntry.audio can store a buffer type in your schema
-      audioEntry.audio = audioBuffer;
-    }
-
-    // Save the updated blog
-    const updatedBlog = await blog.save();
-
-    if (updatedBlog) {
-      return res.status(200).json(updatedBlog);
-    } else {
-      throw new Error('Failed to update audio entry.');
-    }
-
+    const uploadedData = await s3.upload(params).promise();
+    console.log('Uploaded to S3:', uploadedData.Location);
+    return uploadedData.Location;
   } catch (error) {
-    console.error(error);
-
-    // Handle specific error cases
-    if (error.kind === 'ObjectId') {
-      return res.status(400).json({ error: 'Invalid ID format.' });
-    }
-    
-    return res.status(500).json({ error: 'Internal Server Error.' });
+    console.error('Error uploading file to S3:', error);
+    throw error;
   }
 };
 
-// Export the updateOneAudio function to be used in your routes
-module.exports = updateOneAudio;
+module.exports = async function updateOneAudio(req, res) {
+  const { title, description } = req.body;
+  const { id, id2 } = req.params; // Extract both id and id2
+  const audioFile = req.files && req.files['audio'] ? req.files['audio'][0] : null;
+
+  if (!title || !description || !audioFile) {
+    return res.status(400).json({ error: 'Missing required fields for updating the inner audio entry.' });
+  }
+console.log(id,id2);
+  try {
+    const audioUrl = await uploadToS3(audioFile);
+
+    const mainAudio = await AudioSchema.findById(id); // Use id for mainAudio
+
+    if (!mainAudio) {
+      return res.status(404).json({ error: 'Main Audio document not found.' });
+    }
+
+    const innerAudioIndex = mainAudio.audios.findIndex(audio => audio.id === id2);
+
+    if (innerAudioIndex === -1) {
+      return res.status(404).json({ error: 'Inner Audio entry not found.' });
+    }
+
+    mainAudio.audios[innerAudioIndex] = {
+      id: id2,
+      title: title,
+      description: description,
+      audio: audioUrl,
+    };
+
+    const updatedMainAudio = await mainAudio.save();
+
+    if (updatedMainAudio) {
+      res.status(200).json(updatedMainAudio);
+    } else {
+      throw new Error('Failed to update the inner audio entry.');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
+  }
+};

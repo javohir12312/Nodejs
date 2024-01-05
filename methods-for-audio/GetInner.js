@@ -1,73 +1,37 @@
-const fs = require('fs');
-const path = require('path');
 const AudioSchema = require("../model/audio");
 
-module.exports = async function getInnerAudio(req, res) {
-  const { id } = req.params;
-  const uploadDir = path.join(__dirname, '..', 'audio-uploads');
+module.exports =GetInner = async function (req, res) {
+  const mainAudioId = req.params.id; // Extracting main audio ID from request parameters
+  const innerAudioId = req.params.id2; // Extracting inner audio ID from request parameters
 
   try {
-    const blog = await AudioSchema.findById(id);
+    // Fetch the main audio document by its ID
+    const mainAudioDocument = await AudioSchema.findById(mainAudioId);
 
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog post not found.' });
+    // Check if main audio document exists
+    if (!mainAudioDocument) {
+      return res.status(404).json({ error: 'Main Audio document not found.' });
     }
 
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    // Find the inner audio entry by its ID within the audios array
+    const innerAudioEntry = mainAudioDocument.audios.find(audio => audio.id === innerAudioId);
+
+    // Check if inner audio entry exists
+    if (!innerAudioEntry) {
+      return res.status(404).json({ error: 'Inner Audio entry not found.' });
     }
 
-    const audioFiles = []; // Initialize array for audio files
-    const writeFilePromises = [];
-
-    for (const audioItem of blog.audios) {
-      if (audioItem.audio && audioItem.audio.buffer) {
-        const audioFileName = `audio-${audioItem._id}.mp3`;
-        const fullPath = path.join(uploadDir, audioFileName);
-
-        if (!fs.existsSync(fullPath)) {
-          const audioBufferData = arrayBufferToBuffer(audioItem.audio.buffer);
-          const writeFilePromise = fs.promises.writeFile(fullPath, audioBufferData, 'binary');
-          writeFilePromises.push(writeFilePromise);
-          
-        }
-
-        audioFiles.push({
-          id: audioItem.id,
-          title: audioItem.title,
-          description: audioItem.description,
-          audio: `/audio-uploads/${audioFileName}`
-        });
-      }
-    }
-
-    // Wait for all file writing operations to complete
-    await Promise.all(writeFilePromises);
-
-    return res.status(200).json({
-      description: blog.description,
-      title: blog.title,
-      audios: audioFiles,
-      __v: blog.__v
-    });
+    // If inner audio entry exists, send it in the response
+    res.status(200).json(innerAudioEntry);
 
   } catch (error) {
     console.error(error);
 
+    // Handle error
     if (error.kind === 'ObjectId') {
-      return res.status(400).json({ error: 'Invalid ID format.' });
+      return res.status(400).json({ error: 'Invalid audio ID format.' });
     }
 
-    return res.status(500).json({ error: 'Internal Server Error. Failed to fetch the audio entry.' });
+    res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
   }
 };
-
-// Function to convert ArrayBuffer to Buffer
-function arrayBufferToBuffer(arrayBuffer) {
-  const buffer = Buffer.alloc(arrayBuffer.byteLength);
-  const view = new Uint8Array(arrayBuffer);
-  for (let i = 0; i < buffer.length; ++i) {
-    buffer[i] = view[i];
-  }
-  return buffer;
-}

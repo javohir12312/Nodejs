@@ -13,15 +13,21 @@ async function deleteAllFilesFromUploadsFolder() {
         await fs.unlink(filePath);
       }
     }
+    console.log('All files deleted from audio-uploads folder.');
   } catch (error) {
     console.error('Error deleting files:', error);
   }
 }
 
-const intervalDuration = 5 * 60 * 60 * 1000;
+// Set the interval duration to run every 1 hour (3600 seconds).
+const intervalDuration = 3600;
 
+// Run the function once immediately when the script starts.
 deleteAllFilesFromUploadsFolder();
-setInterval(deleteAllFilesFromUploadsFolder, intervalDuration);
-console.log(`Scheduled deletion every ${intervalDuration / (60 * 60 * 1000)} hours.`);
+
+// Set the interval to run the function every hour.
+setInterval(deleteAllFilesFromUploadsFolder, intervalDuration * 1000);
+
+console.log(`Scheduled deletion every ${intervalDuration / 3600} hour(s).`);
 
 module.exports = deleteAllFilesFromUploadsFolder;

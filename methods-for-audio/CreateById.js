@@ -1,71 +1,83 @@
-const mongoose = require("mongoose");
-const { v4: uuidv4 } = require('uuid');
-const AudioSchema = require("../model/audio");
-const fs = require('fs');
+const AWS = require('aws-sdk');
+const fs = require('fs').promises;
 const path = require('path');
+const AudioSchema = require("../model/audio");
+const { v4: uuidv4 } = require('uuid');
 
-module.exports = async function createInnerAudio(req, res) {
-  const { title, description } = req.body;
-  const audioFilePath = req.files && req.files['audio'] ? req.files['audio'][0].path : null;
-  const mainAudioId = req.params.id; // ID of the main audio document
+// AWS Configuration
+const secretAccessKey = "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U";
+const accessKeyId = "DO00RZZQCCEHPQH448HK";
 
-  if (!title || !description || !audioFilePath) {
-    return res.status(400).json({ error: "Missing required fields for creating a new inner audio entry." });
+AWS.config.update({
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+  region: 'us-east-1',
+  endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
+  s3ForcePathStyle: true,
+});
+
+const s3 = new AWS.S3();
+const uploadToS3 = async (file) => {
+  try {
+    const fileContent = await fs.readFile(file.path);
+    const params = {
+      Bucket: 'audio-uploads',
+      Key: `${uuidv4()}.mp3`, // Assuming all are mp3 files
+      Body: fileContent,
+      ACL: 'public-read',
+    };
+    const uploadedData = await s3.upload(params).promise();
+    console.log('Uploaded to S3:', uploadedData.Location);
+    return uploadedData.Location;
+  } catch (error) {
+    console.error('Error uploading file to S3:', error);
+    throw error;
+  }
+};
+
+module.exports = async function CreateById(req, res) {
+  const audioFile = req.files && req.files['audio'] ? req.files['audio'][0] : null;
+
+  if (!audioFile) {
+    return res.status(400).json({ error: 'Missing required audio file.' });
   }
 
   try {
-    // Find the main audio document by ID
+    const audioUrl = await uploadToS3(audioFile);
+
+    const { title, description } = req.body;
+    const mainAudioId = req.params.id; // ID of the main audio document
+
+    if (!title || !description) {
+      return res.status(400).json({ error: 'Missing required fields for creating a new inner audio entry.' });
+    }
+
     const mainAudio = await AudioSchema.findById(mainAudioId);
-  
+
     if (!mainAudio) {
-      return res.status(404).json({ error: "Main Audio document not found." });
+      return res.status(404).json({ error: 'Main Audio document not found.' });
     }
 
-    // Function to read file and return as Buffer
-    const readFileToBuffer = (filePath) => {
-      try {
-        return fs.readFileSync(filePath);
-      } catch (error) {
-        console.error(`Error reading file from path ${filePath}:`, error);
-        return null;
-      }
-    };
-
-    // Read audio file to buffer
-    const audioBuffer = readFileToBuffer(audioFilePath);
-
-    if (!audioBuffer) {
-      return res.status(500).json({ error: "Failed to read audio file data." });
-    }
-    
-    // Generate a unique ID for the inner audio entry
     const innerAudioId = uuidv4();
-    
-    // Create a new inner audio entry
+
     const newInnerAudioEntry = {
       id: innerAudioId,
       title: title,
       description: description,
-      audio: audioBuffer
+      audio: audioUrl,
     };
 
-    // Push the new inner audio entry into the 'audios' array of the main audio document
     mainAudio.audios.push(newInnerAudioEntry);
 
-    // Save the updated main audio document (with the new inner audio entry)
     const updatedMainAudio = await mainAudio.save();
-  
-    // Check if the updatedMainAudio exists and return it
+
     if (updatedMainAudio) {
       res.status(201).json(updatedMainAudio);
     } else {
-      throw new Error("Failed to save the inner audio entry.");
+      throw new Error('Failed to save the inner audio entry.');
     }
   } catch (error) {
     console.error(error);
-    if (error.kind === "ObjectId") {
-      return res.status(400).json({ error: "Invalid main audio ID format." });
-    }
-    res.status(500).json({ error: "Internal Server Error." });
+    res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
   }
 };

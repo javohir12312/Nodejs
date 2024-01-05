@@ -1,63 +1,28 @@
-const path = require('path');
-const fs = require('fs').promises;
 const AudioSchema = require("../model/audio");
 
-function arrayBufferToBuffer(arrayBuffer) {
-  const buffer = Buffer.alloc(arrayBuffer.byteLength);
-  const view = new Uint8Array(arrayBuffer);
-  for (let i = 0; i < buffer.length; ++i) {
-    buffer[i] = view[i];
-  }
-  return buffer;
-}
+module.exports = getBlogByIdAudios = async function (req, res) {
+  const audioId = req.params.id; // Extracting audio ID from request parameters
 
-module.exports = async function getAllAudios(req, res) {
   try {
-    const blogId = req.params.id;
-    const result = await AudioSchema.findById(blogId);
-    
-    if (!result) {
-      return res.status(404).json({ error: "Audio entry not found." });
+    // Fetch the audio document by its ID
+    const audioDocument = await AudioSchema.findById(audioId);
+
+    // Check if audio document exists
+    if (!audioDocument) {
+      return res.status(404).json({ error: 'Audio document not found.' });
     }
 
-    const uploadDir = path.join(__dirname, '..', 'audio-uploads');
-    await fs.mkdir(uploadDir, { recursive: true });
+    // If audio document exists, send it in the response
+    res.status(200).json(audioDocument);
 
-    const processedAudios = await Promise.all(result.audios.map(async (audioItem, index) => {
-      const audioFileName = `smallaudio-${audioItem.id}-${index}.mp3`;
-      const fullPath = path.join(uploadDir, audioFileName);
+  } catch (error) {
+    console.error(error);
 
-      try {
-        await fs.access(fullPath);
-      } catch (error) {
-        if (audioItem.audio && audioItem.audio.buffer) {
-          const audioBufferData = arrayBufferToBuffer(audioItem.audio.buffer);
-          await fs.writeFile(fullPath, audioBufferData);
-        }
-      }
+    // Handle error
+    if (error.kind === 'ObjectId') {
+      return res.status(400).json({ error: 'Invalid audio ID format.' });
+    }
 
-      return {
-        id: audioItem.id,
-        title: audioItem.title,
-        description: audioItem.description,
-        audio: `/audio-uploads/${audioFileName}`
-      };
-    }));
-
-    const processedResult = {
-      _id: result._id,
-      firstname: result.firstname,
-      lastname: result.lastname,
-      image: `/audio-uploads/image-${result._id}.png`,
-      smallaudio: `/audio-uploads/smallaudio-${result._id}.mp3`,
-      audios: processedAudios,
-      __v: result.__v
-    };
-
-    res.send(processedResult);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal Server Error." });
+    res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
   }
 };

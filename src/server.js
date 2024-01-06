@@ -28,6 +28,7 @@ const getPhoneById = require("../phone-number-method/GetByid")
 const updatePhoneById = require("../phone-number-method/Update")
 const deletePhoneById = require("../phone-number-method/deletePhone");
 const deleteAllFilesFromUploadsFolder = require("./helpers");
+const { default: axios } = require("axios");
 const app = express();
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
@@ -93,8 +94,19 @@ app.post("/api/hero", uploadImage.single("image"), createBlog);
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
 
-app.get("/api/audios", getAllAudio);
+// app.get("/api/audios", getAllAudio);
+
+app.get("/api/audios", async (req, res) => {
+  try {
+    const response = await axios.get("https://urchin-app-fuh4a.ondigitalocean.app/api/audios");
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 app.get("/api/audios/:id", getBlogByIdAudios);
+
 app.get("/api/audios/:id/:id2", GetInner);
 app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById);
 app.post("/api/audios", uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), CreateForAudio);
@@ -121,12 +133,12 @@ app.use("/uploads", express.static("uploads"));
 app.use("/uploads-logo", express.static("uploads-logo"));
 app.use("/audio-uploads", express.static("audio-uploads"));
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // Replace with your frontend URL
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // Replace with your frontend URL
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+//   next();
+// });
 
 // Request logging middleware
 app.use((req, res, next) => {

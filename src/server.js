@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs")
 
 const getAllBlogs = require("../methods/GetAll");
 const getBlogById = require("../methods/GetById");
@@ -30,7 +31,7 @@ const deletePhoneById = require("../phone-number-method/deletePhone");
 const deleteAllFilesFromUploadsFolder = require("./helpers");
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
-
+const filePath = 'audio-uploads/audio-1704653513622-737070172.mp3';
 // Connect to MongoDB
 const app = express();
 deleteAllFilesFromUploadsFolder()
@@ -101,6 +102,17 @@ app.get('/api/audio/:filename', async (req, res) => {
 app.use(cors());
 app.use(express.json());
 
+fs.readFile(filePath, (err, data) => {
+  if (err) {
+    if (err.code === 'ENOENT') {
+      console.error('File not found!');
+    } else {
+      console.error('Error reading the file:', err);
+    }
+  } else {
+    console.log('File content:', data);
+  }
+});
 
 // Routes
 app.get("/api/hero", getAllBlogs);

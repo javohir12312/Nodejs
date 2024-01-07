@@ -37,11 +37,11 @@ const uploadToS3 = async (file, fileType) => {
 };
 
 module.exports = async function createAudio(req, res) {
-    const { firstname, lastname } = req.body;
+    const { firstname, lastname,description } = req.body;
     const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0] : null;
     const imageFile = req.files['image'] ? req.files['image'][0] : null;
 
-    if (!firstname || !lastname || !smallaudioFile || !imageFile) {
+    if (!firstname || !lastname || !smallaudioFile || !imageFile ||!description) {
         return res.status(400).json({ error: 'Missing required fields for creating a new audio entry.' });
     }
 
@@ -58,6 +58,7 @@ module.exports = async function createAudio(req, res) {
         const newAudioEntry = new AudioSchema({
             firstname,
             lastname,
+            description,
             smallaudio: smallaudioURL,
             image: imageURL,
         });

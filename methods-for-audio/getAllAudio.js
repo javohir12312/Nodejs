@@ -5,7 +5,7 @@ const AudioSchema = require("../model/audio");
 module.exports = async function getAllAudio(req, res) {
   try {
     // Fetch all audio documents from the database
-    const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios');
+    const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios description');
     
     // Check if no audio documents are found
     if (!audios || audios.length === 0) {
@@ -17,6 +17,7 @@ module.exports = async function getAllAudio(req, res) {
       _id: audio._id,
       firstname: audio.firstname,
       lastname: audio.lastname,
+      description:audio.description,
       smallaudio: audio.smallaudio,
       image: `${audio.image}`, // Convert to URL format if necessary
       // audios: audio.audios.map((item) => ({

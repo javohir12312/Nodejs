@@ -116,7 +116,7 @@ app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById)
 app.post("/api/audios", uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), CreateForAudio);
 app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), UpdateAudio);
 app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudio);
-app.delete("/api/audios/:id", Audiodelete);delteInner
+app.delete("/api/audios/:id", Audiodelete);
 app.delete("/api/audios/:id/:id2", delteInner);
 
 // Logo
@@ -138,12 +138,11 @@ app.use("/uploads-logo", express.static("uploads-logo"));
 app.use("/audio-uploads", express.static("audio-uploads"));
 
 // Request logging middleware
-   app.use((req, res, next) => {
-       res.header("Access-Control-Allow-Origin", "*"); // Replace * with your frontend domain in production
-       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-       next();
-     });
-  
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);

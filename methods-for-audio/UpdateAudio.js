@@ -37,16 +37,17 @@ const uploadToS3 = async (file, fileType) => {
 
 module.exports = async function updateAudio(req, res) {
   const audioId = req.params.id; // Assuming you have audio ID in the request parameters
-  const { firstname, lastname } = req.body;
+  const { firstname, lastname,description } = req.body;
   const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0] : null;
   const imageFile = req.files['image'] ? req.files['image'][0] : null;
 
-  if (!firstname || !lastname) {
+  if (!firstname || !lastname||!description) {
     return res.status(400).json({ error: 'Missing required fields for updating the audio entry.' });
   }
 
   try {
     let updatedFields = {
+      description,
       firstname,
       lastname,
     };

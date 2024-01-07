@@ -28,11 +28,11 @@ const getPhoneById = require("../phone-number-method/GetByid")
 const updatePhoneById = require("../phone-number-method/Update")
 const deletePhoneById = require("../phone-number-method/deletePhone");
 const deleteAllFilesFromUploadsFolder = require("./helpers");
-const app = express();
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 
 // Connect to MongoDB
+const app = express();
 deleteAllFilesFromUploadsFolder()
 async function connect() {
   try {
@@ -81,10 +81,26 @@ const uploadLogo = multer({ storage: LogoStorage });
 const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
+const fetch = require('node-fetch');
 
-// Middlewares
+app.get('/api/audio/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const response = await fetch(` ${filename}`);
+    
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    response.body.pipe(res);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.use(cors());
 app.use(express.json());
+
 
 // Routes
 app.get("/api/hero", getAllBlogs);
@@ -122,11 +138,12 @@ app.use("/uploads-logo", express.static("uploads-logo"));
 app.use("/audio-uploads", express.static("audio-uploads"));
 
 // Request logging middleware
-app.use((req, res, next) => {
-  console.log("Received request with fields:", req.body);
-  next();
-});
-
+   app.use((req, res, next) => {
+       res.header("Access-Control-Allow-Origin", "*"); // Replace * with your frontend domain in production
+       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+       next();
+     });
+  
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);

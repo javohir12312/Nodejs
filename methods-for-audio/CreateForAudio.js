@@ -14,60 +14,58 @@
     region: 'us-east-1',
     endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
     s3ForcePathStyle: true,
-  });
-  
-  const s3 = new AWS.S3();
-  
-  const uploadToS3 = async (file, fileType) => {
-    // Add file type validation here if needed
-  
+});
+
+const s3 = new AWS.S3();
+
+const uploadToS3 = async (file, fileType) => {
     try {
-      const fileContent = await fs.readFile(file.path);
-      const params = {
-        Bucket: 'audio-uploads',
-        Key: `${uuidv4()}.${fileType}`, // Append file type to UUID
-        Body: fileContent,
-        ACL: 'public-read',
-      };
-      const uploadedData = await s3.upload(params).promise();
-      console.log('Uploaded to S3:', uploadedData.Location);
-      return uploadedData.Location;
+        const fileContent = await fs.readFile(file.path);
+        const params = {
+            Bucket: 'audio-uploads',
+            Key: `${uuidv4()}.${fileType}`,
+            Body: fileContent,
+            ACL: 'public-read',
+        };
+        const uploadedData = await s3.upload(params).promise();
+        console.log('Uploaded to S3:', uploadedData.Location);
+        return uploadedData.Location;
     } catch (error) {
-      console.error(`Error uploading file ${file.originalname} to S3:`, error);
-      throw error;
+        console.error(`Error uploading file ${file.originalname} to S3:`, error);
+        throw error;
     }
-  };
-  
-  module.exports = async function createAudio(req, res) {
+};
+
+module.exports = async function createAudio(req, res) {
     const { firstname, lastname } = req.body;
     const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0] : null;
     const imageFile = req.files['image'] ? req.files['image'][0] : null;
-  
+
     if (!firstname || !lastname || !smallaudioFile || !imageFile) {
-      return res.status(400).json({ error: 'Missing required fields for creating a new audio entry.' });
+        return res.status(400).json({ error: 'Missing required fields for creating a new audio entry.' });
     }
-  
+
     try {
-      const [smallaudioURL, imageURL] = await Promise.all([
-        uploadToS3(smallaudioFile, 'mp3'), // Assuming 'smallaudio' is an audio file
-        uploadToS3(imageFile, 'png') // Assuming 'image' is an image file
-      ]);
-  
-      if (!smallaudioURL || !imageURL) {
-        return res.status(500).json({ error: 'Failed to upload file to cloud.' });
-      }
-  
-      const newAudioEntry = new AudioSchema({
-        firstname,
-        lastname,
-        smallaudio: smallaudioURL,
-        image: imageURL,
-      });
-  
-      const createdAudio = await newAudioEntry.save();
-      res.status(201).json(createdAudio);
+        const [smallaudioURL, imageURL] = await Promise.all([
+            uploadToS3(smallaudioFile, 'mp3'),
+            uploadToS3(imageFile, 'png')
+        ]);
+
+        if (!smallaudioURL || !imageURL) {
+            return res.status(500).json({ error: 'Failed to upload file to cloud.' });
+        }
+
+        const newAudioEntry = new AudioSchema({
+            firstname,
+            lastname,
+            smallaudio: smallaudioURL,
+            image: imageURL,
+        });
+
+        const createdAudio = await newAudioEntry.save();
+        res.status(201).json(createdAudio);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Failed to process the request.', detailedError: error.message });
+        console.error(error);
+        res.status(500).json({ error: 'Failed to process the request.', detailedError: error.message });
     }
-  };
+};

@@ -3,7 +3,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs")
 
 const getAllBlogs = require("../methods/GetAll");
 const getBlogById = require("../methods/GetById");
@@ -82,37 +81,10 @@ const uploadLogo = multer({ storage: LogoStorage });
 const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
-const fetch = require('node-fetch');
 
-app.get('/api/audio/:filename', async (req, res) => {
-  try {
-    const { filename } = req.params;
-    const response = await fetch(` ${filename}`);
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    response.body.pipe(res);
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 
 app.use(cors());
 app.use(express.json());
-
-fs.readFile(filePath, (err, data) => {
-  if (err) {
-    if (err.code === 'ENOENT') {
-      console.error('File not found!');
-    } else {
-      console.error('Error reading the file:', err);
-    }
-  } else {
-    console.log('File content:', data);
-  }
-});
 
 // Routes
 app.get("/api/hero", getAllBlogs);
@@ -168,8 +140,4 @@ process.on('SIGINT', () => {
   });
 });
 
-// // Function for creating audio
-// const AudioSchema = require("../model/audio");
-// module.exports = function createAudio(req, res) {
-  
-// };
+

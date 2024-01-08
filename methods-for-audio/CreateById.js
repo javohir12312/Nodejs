@@ -14,6 +14,7 @@ AWS.config.update({
   region: 'us-east-1',
   endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
   s3ForcePathStyle: true,
+
 });
 
 const s3 = new AWS.S3();

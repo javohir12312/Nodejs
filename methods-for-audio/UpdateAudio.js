@@ -37,7 +37,7 @@ const uploadToS3 = async (file, fileType) => {
 
 module.exports = async function UpdateAudio(req, res) {
   const audioId = req.params.id;
-  const { firstname, lastname, description } = req.body;
+  const { firstname, lastname, description,instagram } = req.body;
   const smallaudioFile = req.files['smallaudio'] ? req.files['smallaudio'][0] : null;
   const imageFile = req.files['image'] ? req.files['image'][0] : null;
   const videoFile = req.files['video'] ? req.files['video'][0] : null;
@@ -51,6 +51,7 @@ module.exports = async function UpdateAudio(req, res) {
       description,
       firstname,
       lastname,
+      instagram,
     };
 
     if (smallaudioFile) {

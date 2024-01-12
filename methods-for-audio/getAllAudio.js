@@ -4,7 +4,7 @@ const AudioSchema = require("../model/audio");
 
 module.exports = async function getAllAudio(req, res) {
   try {
-    const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios description video');
+    const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios description video instagram');
     
     if (!audios || audios.length === 0) {
       return res.status(404).json({ error: "Audio data not found." });
@@ -18,6 +18,7 @@ module.exports = async function getAllAudio(req, res) {
       smallaudio: audio.smallaudio,
       image: `${audio.image}`, 
       video: `${audio.video}`, 
+      instagram:audio.instagram,
       audios:audio.audios
     }));
 

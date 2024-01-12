@@ -57,6 +57,10 @@ const audioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  instagram: {
+    type: String,
+    required:false
+  },
   audios: [nestedAudioSchema]
 });
 

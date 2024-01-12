@@ -1,5 +1,20 @@
 const mongoose = require("mongoose");
 
+const CreateNewLinkSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  link: {
+      type: String,
+      required: true
+  }
+});
+
 const nestedAudioSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -14,6 +29,7 @@ const nestedAudioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  links: [CreateNewLinkSchema] // Corrected to an array of CreateNewLinkSchema
 });
 
 const audioSchema = new mongoose.Schema({
@@ -25,7 +41,7 @@ const audioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  description:{
+  description: {
     type: String,
     required: true
   },

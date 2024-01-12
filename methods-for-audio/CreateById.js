@@ -23,7 +23,7 @@ const uploadToS3 = async (file) => {
     const fileContent = await fs.readFile(file.path);
     const params = {
       Bucket: 'audio-uploads',
-      Key: `${uuidv4()}.mp3`, // Assuming all are mp3 files
+      Key: `${uuidv4()}.mp3`,
       Body: fileContent,
       ACL: 'public-read',
     };
@@ -37,17 +37,17 @@ const uploadToS3 = async (file) => {
 };
 
 module.exports = async function CreateById(req, res) {
-  const audioFile = req.files && req.files['audio'] ? req.files['audio'][0] : null;
-
+  const audioFile = req.file;
+  console.log("salom");
   if (!audioFile) {
     return res.status(400).json({ error: 'Missing required audio file.' });
   }
 
   try {
     const audioUrl = await uploadToS3(audioFile);
-
+    const { links } = JSON.parse(req.body.links);
     const { title, description } = req.body;
-    const mainAudioId = req.params.id; // ID of the main audio document
+    const mainAudioId = req.params.id;
 
     if (!title || !description) {
       return res.status(400).json({ error: 'Missing required fields for creating a new inner audio entry.' });
@@ -59,6 +59,14 @@ module.exports = async function CreateById(req, res) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
 
+    const newLinks = links.map(link => ({
+      id: uuidv4(),
+      title: link.title,
+      link: {
+        path: link.path
+      }
+    }));
+
     const innerAudioId = uuidv4();
 
     const newInnerAudioEntry = {
@@ -66,6 +74,7 @@ module.exports = async function CreateById(req, res) {
       title: title,
       description: description,
       audio: audioUrl,
+      links: newLinks 
     };
 
     mainAudio.audios.push(newInnerAudioEntry);

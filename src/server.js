@@ -28,6 +28,7 @@ const getPhoneById = require("../phone-number-method/GetByid")
 const updatePhoneById = require("../phone-number-method/Update")
 const deletePhoneById = require("../phone-number-method/deletePhone");
 const deleteAllFilesFromUploadsFolder = require("./helpers");
+const updateOneLink = require("../methods-for-audio/UpdataOneLink");
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 const filePath = 'audio-uploads/audio-1704653513622-737070172.mp3';
@@ -100,6 +101,7 @@ app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById)
 app.post("/api/audios", uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), CreateForAudio);
 app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), UpdateAudio);
 app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudio);
+app.put("/api/audios/:id/:id2/:id3",updateOneLink);
 app.delete("/api/audios/:id", Audiodelete);
 app.delete("/api/audios/:id/:id2", delteInner);
 

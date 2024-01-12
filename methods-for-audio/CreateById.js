@@ -37,15 +37,17 @@ const uploadToS3 = async (file) => {
 };
 
 module.exports = async function CreateById(req, res) {
-  const audioFile = req.file;
-  console.log("salom");
+  const audioFile =req.files && req.files['audio'] ? req.files['audio'][0] : null;
   if (!audioFile) {
     return res.status(400).json({ error: 'Missing required audio file.' });
   }
 
   try {
     const audioUrl = await uploadToS3(audioFile);
-    const { links } = JSON.parse(req.body.links);
+    const links  = JSON.parse(req.body.links);
+    
+    console.log(links);
+
     const { title, description } = req.body;
     const mainAudioId = req.params.id;
 
@@ -58,13 +60,10 @@ module.exports = async function CreateById(req, res) {
     if (!mainAudio) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
-
     const newLinks = links.map(link => ({
       id: uuidv4(),
       title: link.title,
-      link: {
-        path: link.path
-      }
+      link: link.link
     }));
 
     const innerAudioId = uuidv4();

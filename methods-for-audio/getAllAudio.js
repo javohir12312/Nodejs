@@ -10,17 +10,24 @@ module.exports = async function getAllAudio(req, res) {
       return res.status(404).json({ error: "Audio data not found." });
     }
       
-    const audioWithUrls = audios.map(audio => ({
-      _id: audio._id,
-      firstname: audio.firstname,
-      lastname: audio.lastname,
-      description:audio.description,
-      smallaudio: audio.smallaudio,
-      image: `${audio.image}`, 
-      video: `${audio.video}`, 
-      instagram:audio.instagram,
-      audios:audio.audios
-    }));
+    const audioWithUrls = audios.map(audio => {
+      const extractFileName = (url) => {
+        const parts = url.split('/');
+        return parts.pop() || parts.pop();
+      };
+
+      return {
+        _id: audio._id,
+        firstname: audio.firstname,
+        lastname: audio.lastname,
+        description: audio.description,
+        smallaudio: audio.smallaudio,
+        image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audio.image),
+        video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audio.video),
+        instagram: audio.instagram,
+        audios: audio.audios
+      };
+    });
 
     res.status(200).json(audioWithUrls);
   } catch (err) {

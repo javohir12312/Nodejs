@@ -103,6 +103,8 @@ app.post("/api/hero", uploadImage.single("image"), createBlog);
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
 
+
+
 app.get("/api/audios", getAllAudio);
 app.get("/api/audios/:id", getBlogByIdAudios);
 app.get("/api/audios/:id/:id2", GetInner);

@@ -53,6 +53,10 @@ const audioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  video: {
+    type: String,
+    required: true
+  },
   audios: [nestedAudioSchema]
 });
 

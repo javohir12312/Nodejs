@@ -76,7 +76,16 @@ const audioStorage = multer.diskStorage({
     cb(null, "audio-" + uniqueSuffix + path.extname(file.originalname));
   },
 });
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "video-uploads/"),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "video-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
 
+
+const uploadVideo = multer({ storage: videoStorage, limits: { fileSize: 100000000 } });
 const uploadImage = multer({ storage });
 const uploadLogo = multer({ storage: LogoStorage });
 const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
@@ -98,8 +107,11 @@ app.get("/api/audios", getAllAudio);
 app.get("/api/audios/:id", getBlogByIdAudios);
 app.get("/api/audios/:id/:id2", GetInner);
 app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById);
-app.post("/api/audios", uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), CreateForAudio);
-app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' }]), UpdateAudio);
+app.post("/api/audios", 
+uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]),
+CreateForAudio
+);
+app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]), UpdateAudio);
 app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudio);
 app.put("/api/audios/:id/:id2/:id3",updateOneLink);
 app.delete("/api/audios/:id", Audiodelete);
@@ -134,7 +146,7 @@ app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
 });
 
-// Handle SIGINT signal
+// Handle SIGINT signalxop 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
     console.log('MongoDB connection closed.');

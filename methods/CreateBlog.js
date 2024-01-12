@@ -5,13 +5,11 @@ module.exports = async function createBlog(req, res) {
   const { title, description } = req.body;
   const image = req.file ? req.file.path : null;
 
-  // Check for missing fields
   if (!title || !description || !image) {
     return res.status(400).json({ error: "Missing required fields for creating a new blog post." });
   }
 
   try {
-    // Check if a blog post already exists
     const existingBlog = await Blog.findOne();
 
     if (existingBlog) {

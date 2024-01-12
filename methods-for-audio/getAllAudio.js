@@ -4,25 +4,20 @@ const AudioSchema = require("../model/audio");
 
 module.exports = async function getAllAudio(req, res) {
   try {
-    const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios description');
+    const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios description video');
     
     if (!audios || audios.length === 0) {
       return res.status(404).json({ error: "Audio data not found." });
     }
-    
+      
     const audioWithUrls = audios.map(audio => ({
       _id: audio._id,
       firstname: audio.firstname,
       lastname: audio.lastname,
       description:audio.description,
       smallaudio: audio.smallaudio,
-      image: `${audio.image}`, // Convert to URL format if necessary
-      // audios: audio.audios.map((item) => ({
-      //   id: item.id,
-      //   title: item.title,
-      //   description: item.description,
-      //   audio: `${item.audio}` // Convert to URL format if necessary
-      // }))
+      image: `${audio.image}`, 
+      video: `${audio.video}`, 
       audios:audio.audios
     }));
 

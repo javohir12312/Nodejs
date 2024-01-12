@@ -33,7 +33,7 @@ module.exports = async function updateOneAudio(req, res) {
   const { id, id2 } = req.params;
   const audioFile = req.files && req.files['audio'] ? req.files['audio'][0] : null;
 
-    const links  = JSON.parse(req.body.links);
+    // const links  = JSON.parse(req.body.links);
 
   if (!title || !description || !audioFile) {
     return res.status(400).json({ error: 'Missing required fields for updating the inner audio entry.' });
@@ -46,11 +46,11 @@ module.exports = async function updateOneAudio(req, res) {
     if (!mainAudio) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
- const newLinks = links.map(link => ({
-      id: uuidv4(),
-      title: link.title,
-      link: link.link
-    }));
+// //  const newLinks = links.map(link => ({
+    //   id: uuidv4(),
+    //   title: link.title,
+    //   link: link.link
+    // }));
     const innerAudioIndex = mainAudio.audios.findIndex(audio => audio.id === id2);
 
     if (innerAudioIndex === -1) {
@@ -66,7 +66,7 @@ module.exports = async function updateOneAudio(req, res) {
       title,
       description,
       audio: audioUrl,
-      links: newLinks 
+      // // links: newLinks 
     };
 
     const updatedMainAudio = await mainAudio.save();

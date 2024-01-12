@@ -29,7 +29,7 @@ const nestedAudioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  links: [CreateNewLinkSchema] // Corrected to an array of CreateNewLinkSchema
+  // links: [CreateNewLinkSchema] // Corrected to an array of CreateNewLinkSchema
 });
 
 const audioSchema = new mongoose.Schema({

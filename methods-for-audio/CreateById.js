@@ -44,9 +44,7 @@ module.exports = async function CreateById(req, res) {
 
   try {
     const audioUrl = await uploadToS3(audioFile);
-    const links  = JSON.parse(req.body.links);
-    
-    console.log(links);
+    // const links  = JSON.parse(req.body.links);
 
     const { title, description } = req.body;
     const mainAudioId = req.params.id;
@@ -60,11 +58,11 @@ module.exports = async function CreateById(req, res) {
     if (!mainAudio) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
-    const newLinks = links.map(link => ({
-      id: uuidv4(),
-      title: link.title,
-      link: link.link
-    }));
+    // // const newLinks = links.map(link => ({
+    //   id: uuidv4(),
+    //   title: link.title,
+    //   link: link.link
+    // }));
 
     const innerAudioId = uuidv4();
 
@@ -73,7 +71,7 @@ module.exports = async function CreateById(req, res) {
       title: title,
       description: description,
       audio: audioUrl,
-      links: newLinks 
+      // // links: newLinks 
     };
 
     mainAudio.audios.push(newInnerAudioEntry);

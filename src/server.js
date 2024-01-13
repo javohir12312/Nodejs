@@ -5,6 +5,9 @@ const multer = require("multer");
 const path = require("path");
 
 const getAllBlogs = require("../methods/GetAll");
+const getLinkyId = require("../links-methods/GetByid")
+const deleteLinkById = require("../links-methods/delteLink")
+const updateLinkById = require("../links-methods/Update")
 const getBlogById = require("../methods/GetById");
 const createBlog = require("../methods/CreateBlog");
 const deleteBlog = require("../methods/Delete");
@@ -29,9 +32,10 @@ const updatePhoneById = require("../phone-number-method/Update")
 const deletePhoneById = require("../phone-number-method/deletePhone");
 const deleteAllFilesFromUploadsFolder = require("./helpers");
 const updateOneLink = require("../methods-for-audio/UpdataOneLink");
+const CreateLink = require("../links-methods/CreateLink");
+const GetAllLinks = require("../links-methods/GetAllLinks");
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
-const filePath = 'audio-uploads/audio-1704653513622-737070172.mp3';
 // Connect to MongoDB
 const app = express();
 deleteAllFilesFromUploadsFolder()
@@ -131,6 +135,13 @@ app.get('/api/phone-number', getAll);
 app.get('/api/phone-number/:id', getPhoneById);
 app.put('/api/phone-number/:id', updatePhoneById);
 app.delete('/api/phone-number/:id', deletePhoneById);
+
+// Links
+app.post('/api/links', CreateLink);
+app.get('/api/links', GetAllLinks);
+app.get('/api/links/:id', getLinkyId);
+app.put('/api/links/:id', updateLinkById);
+app.delete('/api/links/:id', deleteLinkById);
 
 // Static file serving
 app.use("/uploads", express.static("uploads"));

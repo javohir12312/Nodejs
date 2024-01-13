@@ -29,6 +29,10 @@ const nestedAudioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  waveformData:{
+    type: [Number],
+    required: true  
+  }
   // links: [CreateNewLinkSchema] // Corrected to an array of CreateNewLinkSchema
 });
 

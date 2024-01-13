@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const AudioSchema = require("../model/audio");
 const { v4: uuidv4 } = require('uuid');
+const { exec } = require('child_process');
 
 // AWS Configuration
 const secretAccessKey = "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U";
@@ -36,6 +37,23 @@ const uploadToS3 = async (file) => {
   }
 };
 
+const generateWaveform = async (audioFilePath) => {
+    return new Promise((resolve, reject) => {
+        const outputPath = path.join(__dirname, `../temp/${uuidv4()}.json`);
+        
+        const command = `audiowaveform -i ${audioFilePath} -o ${outputPath} --pixels-per-second 20`;
+        
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Error generating waveform: ${error}`);
+                reject(error);
+                return;
+            }
+            resolve(outputPath);
+        });
+    });
+};
+
 module.exports = async function CreateById(req, res) {
   const audioFile =req.files && req.files['audio'] ? req.files['audio'][0] : null;
   if (!audioFile) {
@@ -52,6 +70,12 @@ module.exports = async function CreateById(req, res) {
     if (!title || !description) {
       return res.status(400).json({ error: 'Missing required fields for creating a new inner audio entry.' });
     }
+
+
+
+        const waveformPath = await generateWaveform(audioFile.path);
+    const waveformContent = await fs.readFile(waveformPath, 'utf-8');
+    const waveformData = JSON.parse(waveformContent);
 
     const mainAudio = await AudioSchema.findById(mainAudioId);
 
@@ -71,6 +95,7 @@ module.exports = async function CreateById(req, res) {
       title: title,
       description: description,
       audio: audioUrl,
+      waveformData
       // // links: newLinks 
     };
 

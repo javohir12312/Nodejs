@@ -22,6 +22,7 @@ module.exports = async function getAllAudio(req, res) {
         title: item.title,
         audio:"https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(item.audio),
         description: item.description,
+        waveformData: item.waveformData,
        }
       })
 

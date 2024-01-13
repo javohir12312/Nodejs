@@ -9,7 +9,7 @@ module.exports = function createLinks(req, res) {
     return res.status(400).json({ error: 'Missing required fields for creating a new inner audio entry.'  });
   }
 
-  const newPhone = new Links({id:uuidv4() ,title,link });
+  const newPhone = new Links({id:uuidv4(),title,link });
 
   newPhone.save()
     .then((createdPhone) => {
@@ -18,7 +18,6 @@ module.exports = function createLinks(req, res) {
     .catch((error) => {
       console.error(error);
 
-      // Check if the error is due to validation (e.g., required field missing)
       if (error.name === 'ValidationError') {
         return res.status(400).json({ error: error.message });
       }

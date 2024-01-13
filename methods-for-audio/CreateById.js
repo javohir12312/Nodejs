@@ -37,23 +37,6 @@ const uploadToS3 = async (file) => {
   }
 };
 
-const generateWaveform = async (audioFilePath) => {
-    return new Promise((resolve, reject) => {
-        const outputPath = path.join(__dirname, `../temp/${uuidv4()}.json`);
-        
-        const command = `audiowaveform -i ${audioFilePath} -o ${outputPath} --pixels-per-second 20`;
-        
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error generating waveform: ${error}`);
-                reject(error);
-                return;
-            }
-            resolve(outputPath);
-        });
-    });
-};
-
 module.exports = async function CreateById(req, res) {
   const audioFile =req.files && req.files['audio'] ? req.files['audio'][0] : null;
   if (!audioFile) {
@@ -62,7 +45,6 @@ module.exports = async function CreateById(req, res) {
 
   try {
     const audioUrl = await uploadToS3(audioFile);
-    // const links  = JSON.parse(req.body.links);
 
     const { title, description } = req.body;
     const mainAudioId = req.params.id;
@@ -72,10 +54,6 @@ module.exports = async function CreateById(req, res) {
     }
 
 
-
-        const waveformPath = await generateWaveform(audioFile.path);
-    const waveformContent = await fs.readFile(waveformPath, 'utf-8');
-    const waveformData = JSON.parse(waveformContent);
 
     const mainAudio = await AudioSchema.findById(mainAudioId);
 
@@ -95,7 +73,7 @@ module.exports = async function CreateById(req, res) {
       title: title,
       description: description,
       audio: audioUrl,
-      waveformData
+      // waveformData
       // // links: newLinks 
     };
 

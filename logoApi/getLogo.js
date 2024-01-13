@@ -29,8 +29,8 @@ module.exports = getLogo = async function (req, res) {
 
       return {
         ...logo._doc,
-        dark: `/uploads-logo/image-${logo._id}-light.png`,
-        light: `/uploads-logo/image-${logo._id}-dark.png`,
+        light: `/uploads-logo/image-${logo._id}-light.png`,
+        dark : `/uploads-logo/image-${logo._id}-dark.png`,
       };
     });
 

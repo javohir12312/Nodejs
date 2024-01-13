@@ -3,17 +3,29 @@ const path = require('path');
 
 async function deleteAllFilesFromUploadsFolder() {
   const uploadDir = path.join(__dirname, '../../', 'audio-uploads');
+  const uploadDir2 = path.join(__dirname, '../../', 'uploads-logo');
 
   try {
-    const files = await fs.readdir(uploadDir);
-    for (const file of files) {
+    const files1 = await fs.readdir(uploadDir);
+    const files2 = await fs.readdir(uploadDir2);
+    
+    for (const file of files1) {
       const filePath = path.join(uploadDir, file);
       const fileStat = await fs.stat(filePath);
       if (fileStat.isFile()) {
         await fs.unlink(filePath);
       }
     }
-    console.log('All files deleted from audio-uploads folder.');
+
+    for (const file of files2) {
+      const filePath = path.join(uploadDir2, file);
+      const fileStat = await fs.stat(filePath);
+      if (fileStat.isFile()) {
+        await fs.unlink(filePath);
+      }
+    }
+
+    console.log('All files deleted from audio-uploads and uploads-logo folders.');
   } catch (error) {
     console.error('Error deleting files:', error);
   }

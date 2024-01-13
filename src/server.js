@@ -32,12 +32,14 @@ const updateOneLink = require("../methods-for-audio/UpdataOneLink");
 const PORT = process.env.PORT || 5001;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
 const filePath = 'audio-uploads/audio-1704653513622-737070172.mp3';
+const urlFortest = "mongodb+srv://jaloliddinzokirovdev:t3pqsX0KPe3tC3ys@databasefortest.zo43lgd.mongodb.net/?retryWrites=true&w=majority";
+
 // Connect to MongoDB
 const app = express();
 deleteAllFilesFromUploadsFolder()
 async function connect() {
   try {
-    await mongoose.connect(url, {
+    await mongoose.connect(urlFortest, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000,

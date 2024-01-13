@@ -1,47 +1,38 @@
 const Logo = require("../model/logo");
 const fs = require("fs");
 
-module.exports = function createLogo(req, res) {
+module.exports =  createLogo = async (req, res) => {
   const { title } = req.body;
-  const image = req.files && req.files.image ? req.files.image[0].path : undefined;
+  const darkImage = req.files && req.files["dark"] ? req.files["dark"][0].path : undefined;
+  const lightImage = req.files && req.files["light"] ? req.files["light"][0].path : undefined;
 
-  console.log("Received request with fields:", req.files);
-
-  const existingBlog = Logo.findOne();
-
-  if (existingBlog) {
-    return res.status(400).json({ error: "A blog post already exists. Cannot create another one." });
+  const existingLogo = await Logo.findOne();
+  if (existingLogo) {
+    return res.status(400).json({ error: "A logo already exists. Cannot create another one." });
   }
 
-  if (!title || !image) {
-    return res.status(400).json({ err: "Missing required fields for creating a new logo." });
+  if (!title || !darkImage || !lightImage) {
+    return res.status(400).json({ error: "Missing required fields for creating a new logo." });
   }
+
   const readFileToBuffer = (filePath) => {
-    try {
-      return fs.readFileSync(filePath);
-    } catch (error) {
-      console.error(`Error reading file from path ${filePath}:`, error);
-      return null;
-    }
+    return fs.readFileSync(filePath);
   };
 
-  const imageBuffer = readFileToBuffer(image);
+  const darkBuffer = readFileToBuffer(darkImage);
+  const lightBuffer = readFileToBuffer(lightImage);
+
   const newLogo = new Logo({
     title,
-    image: imageBuffer,
+    dark: darkBuffer,
+    light: lightBuffer,
   });
 
-  newLogo.save()
-    .then((createdLogo) => {
-      const logoWithUrl = {
-        ...createdLogo._doc,
-        image: `/uploads-logo/${createdLogo.image}`,
-      };
-
-      res.status(201).json(logoWithUrl);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error." });
-    });
+  try {
+    const savedLogo = await newLogo.save();
+    res.status(201).json(savedLogo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error." });
+  }
 };

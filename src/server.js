@@ -20,7 +20,7 @@ const getBlogByIdAudios = require("../methods-for-audio/getBlogByIdAudios");
 const getLogo = require("../logoApi/getLogo");
 const createLogo = require("../logoApi/createLogo");
 const DeleteLogo = require("../logoApi/DeleteLogo");
-const { updateLogo } = require("../logoApi/UpdateLogo");
+const  updateLogo  = require("../logoApi/UpdateLogo");
 const CreateById = require("../methods-for-audio/CreateById");
 const updateOneAudio = require("../methods-for-audio/updateOneAudio");
 const delteInner = require("../methods-for-audio/DeleteInner");
@@ -43,8 +43,9 @@ async function connect() {
   try {
     await mongoose.connect(url, {
       useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000, // 30 seconds timeout
+  socketTimeoutMS: 45000,
       
     });
     console.log("Connected to MongoDB");
@@ -125,9 +126,9 @@ app.delete("/api/audios/:id/:id2", delteInner);
 
 // Logo
 app.get("/api/logo", getLogo);
-app.post("/api/logo", uploadLogo.fields([{ name: 'image' }]), createLogo);
+app.post("/api/logo", uploadLogo.fields([{ name: 'dark' },{ name: 'light' }]), createLogo);
 app.delete("/api/logo/:id", DeleteLogo);
-app.put("/api/logo/:id", uploadLogo.fields([{ name: 'image' }]), updateLogo);
+app.put("/api/logo/:id", uploadLogo.fields([{ name: 'dark' },{ name: 'light' }]), updateLogo);
 
 // Number
 app.post('/api/phone-number', createPhone);

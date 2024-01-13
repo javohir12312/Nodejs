@@ -1,5 +1,5 @@
-const pathModule = require("path"); // Renamed to pathModule to avoid conflict with later usage
 const fs = require("fs");
+const path = require("path");
 const Logo = require("../model/logo");
 
 function arrayBufferToBuffer(arrayBuffer) {
@@ -11,37 +11,32 @@ function arrayBufferToBuffer(arrayBuffer) {
   return buffer;
 }
 
-module.exports = function getAllBlogs(req, res) {
-  Logo.find()
-    .then((result) => {
-      const blogsWithUrls = result.map(blog => {
+module.exports = getLogo = async function (req, res) {
+  try {
+    const logos = await Logo.find();
 
-        const uploadDir = pathModule.join(__dirname, '..', 'uploads-logo');
+    const logosWithUrls = logos.map((logo) => {
+      const darkPath = path.join(__dirname, '..', 'uploads-logo', `image-${logo._id}-dark.png`);
+      const lightPath = path.join(__dirname, '..', 'uploads-logo', `image-${logo._id}-light.png`);
 
-        let image = "";
-        const imagePath = pathModule.join(uploadDir, `image-${blog._id}.mp3`); // Renamed path to imagePath
-        if (!fs.existsSync(imagePath)) {
-          if (blog.image && blog.image.buffer) {
-            image = `image-${blog._id}.png`;
-            const imageBufferData = arrayBufferToBuffer(blog.image.buffer);
-            const fullPath = pathModule.join(uploadDir, image);
-            try {
-              fs.writeFileSync(fullPath, imageBufferData, 'binary');
-            } catch (error) {
-              image = `smallaudio-${blog._id}.mp3`;
-              console.error(`Error writing image for audio ${blog._id}: ${error.message}`);
-            }
-          }
-        }
-        return {
-          ...blog._doc,
-          image: `/uploads-logo/${image}`,
-        };
-      });
+      if (logo.dark && !fs.existsSync(darkPath)) {
+        fs.writeFileSync(darkPath, arrayBufferToBuffer(logo.dark.buffer), 'binary');
+      }
 
-      res.send(blogsWithUrls);
-    })
-    .catch((err) => {
-      console.log(err);
+      if (logo.light && !fs.existsSync(lightPath)) {
+        fs.writeFileSync(lightPath, arrayBufferToBuffer(logo.light.buffer), 'binary');
+      }
+
+      return {
+        ...logo._doc,
+        dark: `/uploads-logo/image-${logo._id}-light.png`,
+        light: `/uploads-logo/image-${logo._id}-dark.png`,
+      };
     });
+
+    res.status(200).json(logosWithUrls);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error." });
+  }
 };

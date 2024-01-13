@@ -5,7 +5,11 @@ const logoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  image: {
+  light: {
+    type: Buffer,
+    required: true,
+  },
+  dark: {
     type: Buffer,
     required: true,
   },

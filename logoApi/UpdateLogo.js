@@ -1,50 +1,40 @@
-const fs = require('fs');  // Import the fs module
 const Logo = require("../model/logo");
+const fs = require("fs");
 
-module.exports.updateLogo = async function(req, res) {
-  const { id } = req.params; 
+module.exports = updateLogo = async function (req, res) {
+  const { id } = req.params;
   const { title } = req.body;
-  const image = req.files && req.files.image ? req.files.image[0].path : undefined;
-  console.log(image, title, id);
+  const darkImage = req.files && req.files["dark"] ? req.files["dark"][0].path : undefined;
+  const lightImage = req.files && req.files["light"] ? req.files["light"][0].path : undefined;
 
-  if (!title && !image) {
-    return res.status(400).json({ err: "Nothing to update." });
+  const logo = await Logo.findById(id);
+  if (!logo) {
+    return res.status(404).json({ error: "Logo not found." });
+  }
+
+  if (!title && !darkImage && !lightImage) {
+    return res.status(400).json({ error: "Nothing to update." });
+  }
+
+  if (title) {
+    logo.title = title;
   }
 
   const readFileToBuffer = (filePath) => {
-    try {
-      return fs.readFileSync(filePath);
-    } catch (error) {
-      console.error(`Error reading file from path ${filePath}:`, error);
-      return null;
-    }
+    return fs.readFileSync(filePath);
   };
 
-  const imageBuffer = readFileToBuffer(image);
-  
+  if (darkImage) {
+    logo.dark = readFileToBuffer(darkImage);
+  }
+
+  if (lightImage) {
+    logo.light = readFileToBuffer(lightImage);
+  }
+
   try {
-    let logo = await Logo.findById(id);
-
-    if (!logo) {
-      return res.status(404).json({ err: "Logo not found." });
-    }
-
-    if (title) {
-      logo.title = title;
-    }
-
-    if (image) {
-      logo.image = imageBuffer;
-    }
-
-    await logo.save();
-
-    res.status(200).json({
-      id: logo._id,
-      title: logo.title,
-      image: `/uploads-logo/${image}`  // Assuming the image filename is stored in the database
-    });
-
+    const updatedLogo = await logo.save();
+    res.status(200).json(updatedLogo);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error." });

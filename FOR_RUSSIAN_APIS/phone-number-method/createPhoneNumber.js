@@ -22,7 +22,6 @@ module.exports = function createPhoneRussion(req, res) {
     .catch((error) => {
       console.error(error);
 
-      // Check if the error is due to validation (e.g., required field missing)
       if (error.name === 'ValidationError') {
         return res.status(400).json({ error: error.message });
       }

@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const fs = require('fs').promises;
 const path = require('path');
-const AudioSchema = require("../model/audio");
+const Main = require("../model/audio"); // Use the Main model
 const { v4: uuidv4 } = require('uuid');
 const { exec } = require('child_process');
 
@@ -15,7 +15,6 @@ AWS.config.update({
   region: 'us-east-1',
   endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
   s3ForcePathStyle: true,
-
 });
 
 const s3 = new AWS.S3();
@@ -37,57 +36,50 @@ const uploadToS3 = async (file) => {
   }
 };
 
-module.exports = async function CreateById(req, res) {
-  const audioFile =req.files && req.files['audio'] ? req.files['audio'][0] : null;
-  if (!audioFile) {
-    return res.status(400).json({ error: 'Missing required audio file.' });
-  }
-
+const UpdateById = async (req, res) => {
   try {
-    const audioUrl = await uploadToS3(audioFile);
-
     const { title, description } = req.body;
-    const mainAudioId = req.params.id;
+    const { mainId, nestedId } = req.params;
 
     if (!title || !description) {
-      return res.status(400).json({ error: 'Missing required fields for creating a new inner audio entry.' });
+      return res.status(400).json({ error: 'Missing required fields for updating the nested audio entry.' });
     }
 
-
-
-    const mainAudio = await AudioSchema.findById(mainAudioId);
+    const mainAudio = await Main.findById(mainId);
 
     if (!mainAudio) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
-    // // const newLinks = links.map(link => ({
-    //   id: uuidv4(),
-    //   title: link.title,
-    //   link: link.link
-    // }));
 
-    const innerAudioId = uuidv4();
+    // Find the nested audio entry within the 'ru' or 'uz' array
+    const nestedAudio = mainAudio.ru.find(element => element.audios.some(audio => audio.id === nestedId))
+      || mainAudio.uz.find(element => element.audios.some(audio => audio.id === nestedId));
 
-    const newInnerAudioEntry = {
-      id: innerAudioId,
-      title: title,
-      description: description,
-      audio: audioUrl,
-      // waveformData
-      // // links: newLinks 
-    };
+    if (!nestedAudio) {
+      return res.status(404).json({ error: 'Nested Audio entry not found.' });
+    }
 
-    mainAudio.audios.push(newInnerAudioEntry);
+    // Update the nested audio entry
+    nestedAudio.audios.forEach(audio => {
+      if (audio.id === nestedId) {
+        audio.title = title;
+        audio.description = description;
+      }
+    });
 
+    // Save the updated main audio document
     const updatedMainAudio = await mainAudio.save();
 
     if (updatedMainAudio) {
-      res.status(201).json(updatedMainAudio);
+      // Successful response
+      res.status(200).json({ message: 'Nested audio entry updated successfully', data: updatedMainAudio });
     } else {
-      throw new Error('Failed to save the inner audio entry.');
+      throw new Error('Failed to update the nested audio entry.');
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
   }
 };
+
+module.exports = UpdateById;

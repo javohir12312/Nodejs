@@ -1,41 +1,45 @@
-const AudioSchema = require("../model/audio");
+const MainSchema = require("../model/audio");
 
-module.exports = getBlogByIdAudios = async function (req, res) {
-  const audioId = req.params.id; 
+const getById = async (req, res) => {
+  const audioId = req.params.id;
 
   try {
-    const audioDocument = await AudioSchema.findById(audioId);
+    const audioDocument = await MainSchema.findById(audioId);
 
     if (!audioDocument) {
       return res.status(404).json({ error: 'Audio document not found.' });
     }
 
+    // Assuming you want to extract data for a specific language (ru or uz)
+    const extractLanguageData = (languageData) => {
       const extractFileName = (url) => {
         const parts = url.split('/');
         return parts.pop() || parts.pop();
       };
 
-      const data = audioDocument.audios.map(item=>{
-       return {
-        id: item.id,
-        title: item.title,
-        audio:"https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(item.audio),
-        description: item.description,
-       }
-      })
-
-      const eldata =  {
-        _id: audioDocument._id,
-        firstname: audioDocument.firstname,
-        lastname: audioDocument.lastname,
-        description: audioDocument.description,
-        smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audioDocument.smallaudio),
-        image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audioDocument.image),
-        video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audioDocument.video),
-        instagram: audioDocument.instagram,
-        audios: data
+      return {
+        _id: languageData._id,
+        firstname: languageData.firstname,
+        lastname: languageData.lastname,
+        description: languageData.description,
+        smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.smallaudio),
+        image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.image),
+        video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.video),
+        instagram: languageData.instagram,
+        audios: languageData.audios.map(item => ({
+          id: item.id,
+          title: item.title,
+          audio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(item.audio),
+          description: item.description,
+        })),
       };
-    
+    };
+
+    const eldata = {
+      id: audioDocument.id,
+      ru: audioDocument.ru.map(extractLanguageData),
+      uz: audioDocument.uz.map(extractLanguageData),
+    };
 
     res.status(200).json(eldata);
 
@@ -49,3 +53,5 @@ module.exports = getBlogByIdAudios = async function (req, res) {
     res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
   }
 };
+
+module.exports = getById;

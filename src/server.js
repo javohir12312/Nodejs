@@ -34,38 +34,8 @@ const deleteAllFilesFromUploadsFolder = require("./helpers");
 const updateOneLink = require("../methods-for-audio/UpdataOneLink");
 const CreateLink = require("../links-methods/CreateLink");
 const GetAllLinks = require("../links-methods/GetAllLinks");
-
-
-
-const getAllBlogsRussian = require(".././FOR_RUSSIAN_APIS/methods/GetAll");
-const getLinkyIdRussian = require(".././FOR_RUSSIAN_APIS/links-methods/GetByid")
-const deleteLinkByIdRussian = require(".././FOR_RUSSIAN_APIS/links-methods/delteLink")
-const updateLinkByIdRussian = require(".././FOR_RUSSIAN_APIS/links-methods/Update")
-const getBlogByIdRussian = require(".././FOR_RUSSIAN_APIS/methods/GetById");
-const createBlogRussian = require(".././FOR_RUSSIAN_APIS/methods/CreateBlog");
-const deleteBlogRussian = require(".././FOR_RUSSIAN_APIS/methods/Delete");
-const updateBlogRussian = require(".././FOR_RUSSIAN_APIS/methods/UpdateBlog");
-const CreateForAudioRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/CreateForAudio");
-const getAllAudioRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/getAllAudio");
-const UpdateAudioRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/UpdateAudio");
-const AudiodeleteRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/Audiodelete");
-const getBlogByIdAudiosRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/getBlogByIdAudios");
-const getLogoRussian = require(".././FOR_RUSSIAN_APIS/logoApi/getLogo");
-const createLogoRussian = require(".././FOR_RUSSIAN_APIS/logoApi/createLogo");
-const DeleteLogoRussian = require(".././FOR_RUSSIAN_APIS/logoApi/DeleteLogo");
-const  updateLogoRussian  = require(".././FOR_RUSSIAN_APIS/logoApi/UpdateLogo");
-const CreateByIdRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/CreateById");
-const updateOneAudioRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/updateOneAudio");
-const delteInnerRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/DeleteInner");
-const GetInnerRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/GetInner");
-const createPhoneRussian = require('.././FOR_RUSSIAN_APIS/phone-number-method/createPhoneNumber');
-const getAllRussian = require(".././FOR_RUSSIAN_APIS/phone-number-method/GetAllNumber")
-const getPhoneByIdRussian = require(".././FOR_RUSSIAN_APIS/phone-number-method/GetByid")
-const updatePhoneByIdRussian = require(".././FOR_RUSSIAN_APIS/phone-number-method/Update")
-const deletePhoneByIdRussian = require(".././FOR_RUSSIAN_APIS/phone-number-method/deletePhone");
-const updateOneLinkRussian = require(".././FOR_RUSSIAN_APIS/methods-for-audio/UpdataOneLink");
-const CreateLinkRussian = require(".././FOR_RUSSIAN_APIS/links-methods/CreateLink");
-const GetAllLinksRussian = require(".././FOR_RUSSIAN_APIS/links-methods/GetAllLinks");
+const UpdateById = require("../methods-for-audio/updateOneAudio");
+const DeleteAudioById = require("../methods-for-audio/UpdateAudio");
 
 
 const PORT = process.env.PORT || 5001;
@@ -78,7 +48,7 @@ async function connect() {
     await mongoose.connect(url, {
       useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 30000, // 30 seconds timeout
+  serverSelectionTimeoutMS: 40000, // 30 seconds timeout
   socketTimeoutMS: 45000,
       
     });
@@ -127,12 +97,28 @@ const videoStorage = multer.diskStorage({
 const uploadVideo = multer({ storage: videoStorage, limits: { fileSize: 100000000 } });
 const uploadImage = multer({ storage });
 const uploadLogo = multer({ storage: LogoStorage });
-const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
+const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 }}).fields([
+  { name: 'ru_smallaudio', maxCount: 1 },
+  { name: 'ru_image', maxCount: 1 },
+  { name: 'ru_video', maxCount: 1 },
+  { name: 'uz_smallaudio', maxCount: 1 },
+  { name: 'uz_image', maxCount: 1 },
+  { name: 'uz_video', maxCount: 1 },
+])
+
+app.post("/api/audios", uploadSmallAudio, CreateForAudio);
+
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
-
+const corsOptions = {
+  origin: 'http://127.0.0.1:5500', // or '*' for any origin
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
 
 app.use(cors());
+
 app.use(express.json());
 
 // Routes
@@ -142,21 +128,23 @@ app.post("/api/hero", uploadImage.single("image"), createBlog);
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
 
-
+const upload = multer();
 
 app.get("/api/audios", getAllAudio);
 app.get("/api/audios/:id", getBlogByIdAudios);
 app.get("/api/audios/:id/:id2", GetInner);
 app.post("/api/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateById);
-app.post("/api/audios", 
-uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]),
-CreateForAudio
-);
-app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]), UpdateAudio);
-app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudio);
+app.post("/api/audios", uploadSmallAudio, (req, res, next) => {
+  next();
+}, CreateForAudio);
+app.put("/api/audios/:id", uploadSmallAudio, (req, res, next) => {
+  next();
+}, UpdateAudio);
+// app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]), );
+app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), UpdateById);
 app.put("/api/audios/:id/:id2/:id3",updateOneLink);
 app.delete("/api/audios/:id", Audiodelete);
-app.delete("/api/audios/:id/:id2", delteInner);
+app.delete("/api/audios/:id/:id2", DeleteAudioById);
 
 // Logo
 app.get("/api/logo", getLogo);
@@ -179,56 +167,6 @@ app.put('/api/links/:id', updateLinkById);
 app.delete('/api/links/:id', deleteLinkById);
 
 
-
-//------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------
-// Russian
-
-// Routes
-app.get("/api/ru/hero", getAllBlogsRussian);
-app.get("/api/ru/hero/:id", getBlogByIdRussian);
-app.post("/api/ru/hero", uploadImage.single("image"), createBlogRussian);
-app.delete("/api/ru/hero/:id", deleteBlogRussian);
-app.put("/api/ru/hero/:id", uploadImage.single("image"), updateBlogRussian);
-
-
-
-app.get("/api/ru/audios", getAllAudioRussian);
-app.get("/api/ru/audios/:id", getBlogByIdAudiosRussian);
-app.get("/api/ru/audios/:id/:id2", GetInnerRussian);
-app.post("/api/ru/audios/:id", uploadAudio.fields([{ name: 'audio' }]), CreateByIdRussian);
-app.post("/api/ru/audios", 
-uploadSmallAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]),
-CreateForAudioRussian
-);
-app.put("/api/ru/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]), UpdateAudioRussian);
-app.put("/api/ru/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), updateOneAudioRussian);
-app.put("/api/ru/audios/:id/:id2/:id3",updateOneLinkRussian);
-app.delete("/api/ru/audios/:id", AudiodeleteRussian);
-app.delete("/api/ru/audios/:id/:id2", delteInnerRussian);
-
-// Logo
-app.get("/api/ru/logo", getLogoRussian);
-app.post("/api/ru/logo", uploadLogo.fields([{ name: 'dark' },{ name: 'light' }]), createLogoRussian);
-app.delete("/api/ru/logo/:id", DeleteLogoRussian);
-app.put("/api/ru/logo/:id", uploadLogo.fields([{ name: 'dark' },{ name: 'light' }]), updateLogoRussian);
-
-// Number
-app.post('/api/ru/phone-number', createPhoneRussian);
-app.get('/api/ru/phone-number', getAllRussian);
-app.get('/api/ru/phone-number/:id', getPhoneByIdRussian);
-app.put('/api/ru/phone-number/:id', updatePhoneByIdRussian);
-app.delete('/api/ru/phone-number/:id', deletePhoneByIdRussian);
-
-// Links
-app.post('/api/ru/links', CreateLinkRussian);
-app.get('/api/ru/links', GetAllLinksRussian);
-app.get('/api/ru/links/:id', getLinkyIdRussian);
-app.put('/api/ru/links/:id', updateLinkByIdRussian);
-app.delete('/api/ru/links/:id', deleteLinkByIdRussian);
 // Static file serving
 app.use("/uploads", express.static("uploads"));
 app.use("/uploads-logo", express.static("uploads-logo"));

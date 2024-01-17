@@ -4,6 +4,7 @@ const nestedAudioSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
+    index: true,
   },
   title: {
     type: String,
@@ -53,8 +54,8 @@ const mainSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  ru: [languageSchema],
-  uz: [languageSchema],
+  ru: languageSchema,
+  uz: languageSchema, 
 });
 
 module.exports = mongoose.model("Main", mainSchema);

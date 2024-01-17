@@ -4,7 +4,6 @@ const { v4: uuidv4 } = require('uuid');
 const Main = require("../model/audio");
 const path = require('path');
 
-
 AWS.config.update({
   accessKeyId: "DO00RZZQCCEHPQH448HK",
   secretAccessKey: "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U",
@@ -39,54 +38,67 @@ const deleteFromS3 = async (url) => {
 
 const UpdateById = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { uz, ru } = req.body;
     const { id, id2 } = req.params;
+    const uzData = JSON.parse(uz);
+    const ruData = JSON.parse(ru);
 
-    if (!title || !description) {
+    if (!ruData.title || !ruData.description || !uzData.title || !uzData.description) {
       return res.status(400).json({ error: 'Missing required fields for updating the nested audio entry.' });
     }
 
-    const mainAudio = await Main.findById(id).maxTimeMS(20000); // Set the timeout to 20 seconds
-
+    const mainAudio = await Main.findById(id);
 
     if (!mainAudio) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
 
-    // Find the nested audio entry within the 'ru' array
-    const nestedAudioRu = mainAudio.ru.reduce((acc, curr) => acc.concat(curr.audios), [])
-      .find(audio => audio.id === id2);
+    const audioFiles = req.files['audio'];
 
-    // Find the nested audio entry within the 'uz' array
-    const nestedAudioUz = mainAudio.uz.reduce((acc, curr) => acc.concat(curr.audios), [])
-      .find(audio => audio.id === id2);
-
-    if (nestedAudioRu) {
-      // Upload the new audio file to S3
-      await deleteFromS3(nestedAudioRu.audio);
-      const newAudioUrl = await uploadToS3(req.files['audio'][0]);
-
-      // Update the nested audio entry in 'ru'
-      nestedAudioRu.title = title;
-      nestedAudioRu.description = description;
-      nestedAudioRu.audio = newAudioUrl;
+    if (!audioFiles || audioFiles.length === 0) {
+      return res.status(400).json({ error: 'No audio files provided.' });
     }
 
-    if (nestedAudioUz) {
-      // Upload the new audio file to S3
-      const newAudioUrl = await uploadToS3(req.files['audio'][0]);
+    const ruAudioPromises = audioFiles.map(async (audio) => {
+      const audioURL = await uploadToS3(audio, 'mp3');
+      return {
+        id: id2,
+        title: ruData.title,
+        description: ruData.description,
+        audio: audioURL,
+      };
+    });
 
-      // Update the nested audio entry in 'uz'
-      nestedAudioUz.title = title;
-      nestedAudioUz.description = description;
-      nestedAudioUz.audio = newAudioUrl;
-    }
+    const uzAudioPromises = audioFiles.map(async (audio) => {
+      const audioURL = await uploadToS3(audio, 'mp3');
+      return {
+        id: id2,
+        title: uzData.title,
+        description: uzData.description,
+        audio: audioURL,
+      };
+    });
 
-    // Save the updated main audio document
+    const [ruAudios, uzAudios] = await Promise.all([
+      Promise.all(ruAudioPromises),
+      Promise.all(uzAudioPromises),
+    ]);
+
+    // Find the index of the audio entry with the provided id2
+    const ruAudioIndex = mainAudio.ru.audios.findIndex((audio) => audio.id === id2);
+    const uzAudioIndex = mainAudio.uz.audios.findIndex((audio) => audio.id === id2);
+
+    // Delete the existing audio file from S3
+    await deleteFromS3(mainAudio.ru.audios[ruAudioIndex].audio);
+    await deleteFromS3(mainAudio.uz.audios[uzAudioIndex].audio);
+
+    // Update the specific audio entry with the new data
+    mainAudio.ru.audios[ruAudioIndex] = ruAudios[0];
+    mainAudio.uz.audios[uzAudioIndex] = uzAudios[0];
+
     const updatedMainAudio = await mainAudio.save();
 
     if (updatedMainAudio) {
-      // Successful response
       res.status(200).json({ message: 'Nested audio entry updated successfully', data: updatedMainAudio });
     } else {
       throw new Error('Failed to update the nested audio entry.');
@@ -96,7 +108,5 @@ const UpdateById = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
   }
 };
-
-
 
 module.exports = UpdateById;

@@ -1,54 +1,57 @@
-const AWS = require('aws-sdk');
-const path = require('path');
-const AudioSchema = require("../model/audio");
+const mongoose = require("mongoose");
+const Main = require("../model/audio");
 
 module.exports = async function getAllAudio(req, res) {
-  // try {
-  //   const audios = await AudioSchema.find({}, '_id firstname lastname smallaudio image audios description video instagram');
-    
-  //   if (!audios || audios.length === 0) {
-  //     return res.status(404).json({ error: "Audio data not found." });
-  //   }
-      
-  //   const audioWithUrls = audios.map(audiox => {
-  //     const extractFileName = (url) => {
-  //       const parts = url.split('/');
-  //       return parts.pop() || parts.pop();
-  //     };
-
-  //     const data = audiox.audios.map(item=>{
-  //      return {
-  //       id: item.id,
-  //       title: item.title,
-  //       audio:"https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(item.audio),
-  //       description: item.description,
-  //       waveformData: item.waveformData,
-  //      }
-  //     })
-
-  //     return {
-  //       _id: audiox._id,
-  //       firstname: audiox.firstname,
-  //       lastname: audiox.lastname,
-  //       description: audiox.description,
-  //       smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audiox.smallaudio),
-  //       image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audiox.image),
-  //       video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/"+extractFileName(audiox.video),
-  //       instagram: audiox.instagram,
-  //       audios: data
-  //     };
-  //   });
-
-  //   res.status(200).json(audioWithUrls);
-  // } catch (err) {
-  //   console.error(err);
-  //   res.status(500).json({ error: "Internal Server Error." });
-  // }
-
   try {
-    const audioEntries = await AudioSchema.find();
-    console.log(audioEntries);
-    res.status(200).json(audioEntries);
+    const audioEntries = await Main.find({}, '_id ru.firstname ru.lastname ru.smallaudio ru.image ru.audios description ru.video ru.instagram uz.firstname uz.lastname uz.smallaudio uz.image uz.audios description uz.video uz.instagram');
+    
+    if (!audioEntries || audioEntries.length === 0) {
+      return res.status(404).json({ error: "Audio data not found." });
+    }
+    const audioWithUrls = audioEntries.map(entry => {
+      const extractFileName = (url) => {
+        const parts = url.split('/');
+        return parts.pop() || parts.pop();
+      };
+    
+      const mapAudioData = (audios) => {
+        return audios.map(item => {
+          return {
+            id: item.id,
+            title: item.title,
+            audio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(item.audio),
+            description: item.description,
+          };
+        });
+      };
+    
+      return {
+        _id: entry._id,
+        ru: {
+          firstname: entry.ru.firstname,
+          lastname: entry.ru.lastname,
+          description: entry.ru.description,
+          smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallaudio),
+          image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.image),
+          video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.video),
+          instagram: entry.ru.instagram,
+          audios: mapAudioData(entry.ru.audios),  // Include audios with URLs here
+        },
+        uz: {
+          firstname: entry.uz.firstname,
+          lastname: entry.uz.lastname,
+          description: entry.description,
+          smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.smallaudio),
+          image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.image),
+          video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.video),
+          instagram: entry.uz.instagram,
+          audios: mapAudioData(entry.uz.audios),  // Include audios with URLs here
+        },
+      };
+    });
+    
+
+    res.status(200).json(audioWithUrls);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch audio entries.', detailedError: error.message });

@@ -35,46 +35,68 @@ const uploadToS3 = async (file) => {
     throw error;
   }
 };
-
-const UpdateById = async (req, res) => {
+const CreateById = async (req, res) => {
   try {
-    const { title, description } = req.body;
-    const { mainId, nestedId } = req.params;
+    const { uz, ru } = req.body;
+    const { id } = req.params;
+    const uzData = JSON.parse(uz);
+    const ruData = JSON.parse(ru);
 
-    if (!title || !description) {
+    if (!ruData.title || !ruData.description || !uzData.title || !uzData.description) {
       return res.status(400).json({ error: 'Missing required fields for updating the nested audio entry.' });
     }
 
-    const mainAudio = await Main.findById(mainId);
+    const mainAudio = await Main.findById(id).maxTimeMS(30000);
 
     if (!mainAudio) {
       return res.status(404).json({ error: 'Main Audio document not found.' });
     }
 
-    // Find the nested audio entry within the 'ru' or 'uz' array
-    const nestedAudio = mainAudio.ru.find(element => element.audios.some(audio => audio.id === nestedId))
-      || mainAudio.uz.find(element => element.audios.some(audio => audio.id === nestedId));
+    const audioFiles = req.files['audio'];
 
-    if (!nestedAudio) {
-      return res.status(404).json({ error: 'Nested Audio entry not found.' });
+    if (!audioFiles || audioFiles.length === 0) {
+      return res.status(400).json({ error: 'No audio files provided.' });
     }
 
-    // Update the nested audio entry
-    nestedAudio.audios.forEach(audio => {
-      if (audio.id === nestedId) {
-        audio.title = title;
-        audio.description = description;
-      }
-    });
+    const audioId = uuidv4(); // Generate a unique ID for each audio entry
 
-    // Save the updated main audio document
+    const ruAudios = audioFiles.map(async (audio) => {
+      const audioURL = await uploadToS3(audio, 'mp3');
+      return {
+        _id: id,
+        id: audioId,
+        title: ruData.title,
+        description: ruData.description,
+        audio: audioURL,
+      };
+    });
+    
+    const uzAudios = audioFiles.map(async (audio) => {
+      const audioURL = await uploadToS3(audio, 'mp3');
+      return {
+        _id: id,
+        id: audioId,
+        title: uzData.title,
+        description: uzData.description,
+        audio: audioURL,
+      };
+    });
+    
+    // Use Promise.all for both language promises
+    const [ruAudioEntries, uzAudioEntries] = await Promise.all([
+      Promise.all(ruAudios),
+      Promise.all(uzAudios),
+    ]);
+
+    mainAudio.ru.audios.push(...ruAudioEntries);
+    mainAudio.uz.audios.push(...uzAudioEntries);
+
     const updatedMainAudio = await mainAudio.save();
 
     if (updatedMainAudio) {
-      // Successful response
-      res.status(200).json({ message: 'Nested audio entry updated successfully', data: updatedMainAudio });
+      res.status(200).json({ message: 'Nested audio entries updated successfully', data: updatedMainAudio });
     } else {
-      throw new Error('Failed to update the nested audio entry.');
+      throw new Error('Failed to update the nested audio entries.');
     }
   } catch (error) {
     console.error(error);
@@ -82,4 +104,8 @@ const UpdateById = async (req, res) => {
   }
 };
 
-module.exports = UpdateById;
+module.exports = CreateById;
+
+
+
+

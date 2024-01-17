@@ -89,12 +89,14 @@ module.exports = async function CreateForAudio(req, res) {
         smallaudio: ruSmallaudioURL,
         image: ruImageURL,
         video: ruVideoURL,
+        audios:[]
       },
       uz: {
         ...Uzdata,
         smallaudio: uzSmallaudioURL,
         image: uzImageURL,
         video: uzVideoURL,
+        audios:[]
       },
     });
 

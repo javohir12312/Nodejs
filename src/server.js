@@ -140,11 +140,10 @@ app.post("/api/audios", uploadSmallAudio, (req, res, next) => {
 app.put("/api/audios/:id", uploadSmallAudio, (req, res, next) => {
   next();
 }, UpdateAudio);
-// app.put("/api/audios/:id", uploadAudio.fields([{ name: 'smallaudio' }, { name: 'image' },{ name: 'video' }]), );
 app.put("/api/audios/:id/:id2", uploadAudio.fields([{ name: 'audio' }]), UpdateById);
 app.put("/api/audios/:id/:id2/:id3",updateOneLink);
 app.delete("/api/audios/:id", Audiodelete);
-app.delete("/api/audios/:id/:id2", DeleteAudioById);
+app.delete("/api/audios/:id/:id2", delteInner);
 
 // Logo
 app.get("/api/logo", getLogo);

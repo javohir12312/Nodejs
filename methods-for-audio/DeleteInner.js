@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
-const path = require('path'); 
-const AudioSchema = require("../model/audio");
+const path = require('path');
+const Main = require("../model/audio");
 
 const secretAccessKey = "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U";
 const accessKeyId = "DO00RZZQCCEHPQH448HK";
@@ -15,48 +15,8 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-const delteInner = async (req, res) => {
-  const { id, id2 } = req.params;
-
-  try {
-    const blog = await AudioSchema.findById(id);
-
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog post not found.' });
-    }
-
-    const audioEntry = blog.audios.find(audio => audio.id === id2);
-
-    if (!audioEntry) {
-      return res.status(404).json({ error: 'Audio entry not found.' });
-    }
-
-    if (audioEntry.audio) {
-      await deleteFromS3(audioEntry.audio);
-    }
-
-    blog.audios = blog.audios.filter(audio => audio.id !== id2);
-
-    const updatedBlog = await blog.save();
-
-    res.status(200).json(updatedBlog);
-
-  } catch (error) {
-    console.error(error);
-
-    if (error.kind === 'ObjectId') {
-      return res.status(400).json({ error: 'Invalid ID format.' });
-    }
-
-    res.status(500).json({ error: 'Internal Server Error. Failed to delete the audio entry.' });
-  }
-};
-
-module.exports = delteInner;
-
 const deleteFromS3 = async (url) => {
-  const key = path.basename(url); 
-  console.log(key);
+  const key = path.basename(url);
   const params = {
     Bucket: 'audio-uploads',
     Key: key
@@ -70,3 +30,42 @@ const deleteFromS3 = async (url) => {
     throw error;
   }
 };
+
+const delteInner = async (req, res) => {
+  try {
+    const { id, id2 } = req.params;
+
+    const mainAudio = await Main.findById(id).maxTimeMS(30000);
+
+    if (!mainAudio) {
+      return res.status(404).json({ error: 'Main Audio document not found.' });
+    }
+
+    // Find the index of the audio entry in both languages
+    const ruIndex = mainAudio.ru.audios.findIndex(audio => audio.id === id2);
+    const uzIndex = mainAudio.uz.audios.findIndex(audio => audio.id === id2);
+
+    if (ruIndex === -1 || uzIndex === -1) {
+      return res.status(404).json({ error: 'Audio entry not found.' });
+    }
+
+    // Remove the audio entry from both languages
+    mainAudio.ru.audios.splice(ruIndex, 1);
+    mainAudio.uz.audios.splice(uzIndex, 1);
+
+    const updatedMainAudio = await mainAudio.save();
+
+    if (updatedMainAudio) {
+      res.status(200).json({ message: 'Audio entry deleted successfully', data: updatedMainAudio });
+    } else {
+      throw new Error('Failed to delete the audio entry.');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error.', detailedError: error.message });
+  }
+};
+
+module.exports = delteInner;
+
+

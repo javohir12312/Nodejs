@@ -4,19 +4,18 @@ const getById = async (req, res) => {
   const audioId = req.params.id;
 
   try {
-    const audioDocument = await MainSchema.findById(audioId);
+    const audioDocument = await MainSchema.findById(audioId).maxTimeMS(60000);// Increase to 60 seconds
 
     if (!audioDocument) {
       return res.status(404).json({ error: 'Audio document not found.' });
     }
 
-    // Assuming you want to extract data for a specific language (ru or uz)
-    const extractLanguageData = (languageData) => {
-      const extractFileName = (url) => {
-        const parts = url.split('/');
-        return parts.pop() || parts.pop();
-      };
+    const extractFileName = (url) => {
+      const parts = url.split('/');
+      return parts.pop() || parts.pop();
+    };
 
+    const extractLanguageData = (languageData) => {
       return {
         _id: languageData._id,
         firstname: languageData.firstname,
@@ -37,8 +36,8 @@ const getById = async (req, res) => {
 
     const eldata = {
       id: audioDocument.id,
-      ru: audioDocument.ru.map(extractLanguageData),
-      uz: audioDocument.uz.map(extractLanguageData),
+      ru: extractLanguageData(audioDocument.ru),
+      uz: extractLanguageData(audioDocument.uz),
     };
 
     res.status(200).json(eldata);

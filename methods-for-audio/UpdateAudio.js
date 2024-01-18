@@ -77,7 +77,6 @@ module.exports = async function UpdateAudioEntry(req, res) {
 
     // Update only the required fields
     existingAudioEntry.ru = {
-      ...existingAudioEntry.ru,
       ...Rudata,
       smallaudio: ruSmallaudioURL,
       image: ruImageURL,
@@ -85,7 +84,6 @@ module.exports = async function UpdateAudioEntry(req, res) {
     };
 
     existingAudioEntry.uz = {
-      ...existingAudioEntry.uz,
       ...Uzdata,
       smallaudio: uzSmallaudioURL,
       image: uzImageURL,

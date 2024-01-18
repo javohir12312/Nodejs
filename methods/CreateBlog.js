@@ -2,10 +2,13 @@ const fs = require('fs');
 const Blog = require("../model/model");
 
 module.exports = async function createBlog(req, res) {
-  const { title, description } = req.body;
+  const { uz, ru } = req.body;
   const image = req.file ? req.file.path : null;
+  
+  const uzData = JSON.parse(uz)
+  const ruData = JSON.parse(ru)
 
-  if (!title || !description || !image) {
+  if (!ruData.title || !ruData.description || !image || !ruData.title || !ruData.description ) {
     return res.status(400).json({ error: "Missing required fields for creating a new blog post." });
   }
 
@@ -28,9 +31,7 @@ module.exports = async function createBlog(req, res) {
     const imageBuffer = readFileToBuffer(image);
 
     const newBlog = new Blog({
-      title,
-      description,
-      image: imageBuffer,
+      uz:uzda
     });
 
     const createdBlog = await newBlog.save();

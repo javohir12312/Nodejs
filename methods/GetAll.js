@@ -17,22 +17,9 @@ module.exports = function getAllBlogs(req, res) {
       const blogsWithUrls = result.map(blog => {
         const uploadDir = path.join(__dirname, '..', 'uploads');
 
-        let image= ""
-        
-        if (blog.image && blog.image.buffer) {
-          image = `image-${blog._id}.png`;
-          const imageBufferData = arrayBufferToBuffer(blog.image.buffer);
-          const fullPath = path.join(uploadDir, image);
-          try {
-            fs.writeFileSync(fullPath, imageBufferData, 'binary');
-          } catch (error) {
-            console.error(`Error writing image for audio ${blog._id}: ${error.message}`);
-          }
-        }
-
+ 
         return {
           ...blog._doc,
-          image: `/uploads/${image}`,
         };
       });
 

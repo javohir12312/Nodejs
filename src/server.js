@@ -36,6 +36,7 @@ const CreateLink = require("../links-methods/CreateLink");
 const GetAllLinks = require("../links-methods/GetAllLinks");
 const UpdateById = require("../methods-for-audio/updateOneAudio");
 const DeleteAudioById = require("../methods-for-audio/UpdateAudio");
+const CreateBlog = require("../methods/CreateBlog");
 
 
 const PORT = process.env.PORT || 5001;
@@ -124,7 +125,7 @@ app.use(express.json());
 // Routes
 app.get("/api/hero", getAllBlogs);
 app.get("/api/hero/:id", getBlogById);
-app.post("/api/hero", uploadImage.single("image"), createBlog);
+app.post("/api/hero", uploadImage.single("image"), CreateBlog);
 app.delete("/api/hero/:id", deleteBlog);
 app.put("/api/hero/:id", uploadImage.single("image"), updateBlog);
 

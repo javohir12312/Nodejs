@@ -49,7 +49,6 @@ module.exports = async function UpdateAudioEntry(req, res) {
     const Rudata = JSON.parse(ru);
     const Uzdata = JSON.parse(uz);
 
-    // Check if required fields are present
     if (
       !Rudata ||
       !Rudata.firstname ||
@@ -75,9 +74,7 @@ module.exports = async function UpdateAudioEntry(req, res) {
       uploadToS3(req.files['uz_video'][0], 'mp4')
     ]);
 
-    // Update only the required fields
     existingAudioEntry.ru = {
-      ...existingAudioEntry.ru,
       ...Rudata,
       smallaudio: ruSmallaudioURL,
       image: ruImageURL,
@@ -85,7 +82,6 @@ module.exports = async function UpdateAudioEntry(req, res) {
     };
 
     existingAudioEntry.uz = {
-      ...existingAudioEntry.uz,
       ...Uzdata,
       smallaudio: uzSmallaudioURL,
       image: uzImageURL,

@@ -1,21 +1,29 @@
-const mongoose = require("mongoose")
-const Schema = require("schema")
+const mongoose = require("mongoose");
+const Schema = require("schema");
 
-
-const blogSchema = new mongoose.Schema({
-  title:{
-    type:String,
-    required:true
-  },
-  description:{
-    type:String,
-    required:true
-  },
-  image:{
-    type:Buffer,
+const languageSchema = new mongoose.Schema({
+  title: {
+    type: String,
     required: true
   },
-},{timestamps:true});
+  description: {
+    type: String,
+    required: true
+  },
+  image: {
+    type: String,  // Assuming you want to store the image buffer
+    required: true
+  },
+});
 
-const Blog = mongoose.model("Blog",blogSchema)
-module.exports = Blog  
+const mainSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+  },
+  ru: languageSchema,
+  uz: languageSchema, 
+});
+
+const Blog = mongoose.model("Blog", mainSchema);
+module.exports = Blog;

@@ -48,13 +48,10 @@ async function submitForm(event) {
     if (response.ok) {
       const data = await response.json();
       console.log('Success:', data);
-      // Handle success response, e.g., show a success message
     } else {
       console.error('Error:', response.statusText);
-      // Handle error response, e.g., show an error message
     }
   } catch (error) {
     console.error('Error:', error.message);
-    // Handle other types of errors
   }
 }

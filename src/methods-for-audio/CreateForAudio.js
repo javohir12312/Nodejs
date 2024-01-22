@@ -44,6 +44,7 @@ module.exports = async function CreateForAudio(req, res) {
     const ruSmallaudioFile = req.files['ru_smallaudio'] ? req.files['ru_smallaudio'][0] : null;
     const ruImageFile = req.files['ru_image'] ? req.files['ru_image'][0] : null;
     const ruVideoFile = req.files['ru_video'] ? req.files['ru_video'][0] : null;
+    const ruSmallImage = req.files['ru_smallimage'] ? req.files['ru_smallimage'][0] : null;
 
 
     if (
@@ -57,7 +58,8 @@ module.exports = async function CreateForAudio(req, res) {
       !Uzdata.description ||
       !ruSmallaudioFile ||
       !ruImageFile ||
-      !ruVideoFile 
+      !ruVideoFile ||
+      !ruSmallImage
     ) {
       console.log('Missing required fields for creating a new audio entry.');
       return res.status(400).json({
@@ -65,10 +67,11 @@ module.exports = async function CreateForAudio(req, res) {
       });
     }
   try {
-    const [ruSmallaudioURL, ruImageURL, ruVideoURL] = await Promise.all([
+    const [ruSmallaudioURL, ruImageURL, ruVideoURL,smallImageURL] = await Promise.all([
       uploadToS3(ruSmallaudioFile, 'mp3'),
       uploadToS3(ruImageFile, 'png'),
-      uploadToS3(ruVideoFile, 'mp4')
+      uploadToS3(ruVideoFile, 'mp4'),
+      uploadToS3(ruSmallImage, 'png'),
     ]);
 
     const newAudioEntry = new MainSchema({
@@ -76,6 +79,7 @@ module.exports = async function CreateForAudio(req, res) {
       ru: {
         ...Rudata,
         smallaudio: ruSmallaudioURL,
+        smallimage:smallImageURL,
         image: ruImageURL,
         video: ruVideoURL,
         audios:[]
@@ -83,6 +87,7 @@ module.exports = async function CreateForAudio(req, res) {
       uz: {
         ...Uzdata,
         smallaudio: ruSmallaudioURL,
+        smallimage:smallImageURL,
         image: ruImageURL,
         video: ruVideoURL,
         audios:[]

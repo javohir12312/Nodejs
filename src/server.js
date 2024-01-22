@@ -102,9 +102,7 @@ const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100
   { name: 'ru_smallaudio', maxCount: 1 },
   { name: 'ru_image', maxCount: 1 },
   { name: 'ru_video', maxCount: 1 },
-  { name: 'uz_smallaudio', maxCount: 1 },
-  { name: 'uz_image', maxCount: 1 },
-  { name: 'uz_video', maxCount: 1 },
+  { name: 'ru_smallimage', maxCount: 1 },
 ])
 
 app.post("/api/audios", uploadSmallAudio, CreateForAudio);

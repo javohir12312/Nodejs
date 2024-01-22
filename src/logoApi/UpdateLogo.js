@@ -1,6 +1,6 @@
 const fs = require('fs');  // Import the fs module
 const Logo = require("../model/logo");
-const deleteAllFilesFromUploadsFolder = require('../src/helpers');
+const deleteAllFilesFromUploadsFolder = require('../helpers');
 
 module.exports =updateLogo = async function(req, res) {
   const { id } = req.params; 

@@ -16,8 +16,8 @@ module.exports = getLogo = async function (req, res) {
     const logos = await Logo.find();
 
     const logosWithUrls = logos.map((logo) => {
-      const darkPath = path.join(__dirname, '..', 'uploads-logo', `image-${logo._id}-dark.png`);
-      const lightPath = path.join(__dirname, '..', 'uploads-logo', `image-${logo._id}-light.png`);
+      const darkPath = path.join(__dirname, '../../', 'uploads-logo', `image-${logo._id}-dark.png`);
+      const lightPath = path.join(__dirname, '../../', 'uploads-logo', `image-${logo._id}-light.png`);
 
       if (logo.dark && !fs.existsSync(darkPath)) {
         fs.writeFileSync(darkPath, arrayBufferToBuffer(logo.dark.buffer), 'binary');

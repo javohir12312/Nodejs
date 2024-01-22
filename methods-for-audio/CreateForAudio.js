@@ -35,7 +35,6 @@ const uploadToS3 = async (file, fileType) => {
 };
 
 module.exports = async function CreateForAudio(req, res) {
-    // Extract ru and uz directly from req.body
     const { ru, uz } = req.body;
 
     console.log(req.body);
@@ -46,11 +45,7 @@ module.exports = async function CreateForAudio(req, res) {
     const ruImageFile = req.files['ru_image'] ? req.files['ru_image'][0] : null;
     const ruVideoFile = req.files['ru_video'] ? req.files['ru_video'][0] : null;
 
-    const uzSmallaudioFile = req.files['uz_smallaudio'] ? req.files['uz_smallaudio'][0] : null;
-    const uzImageFile = req.files['uz_image'] ? req.files['uz_image'][0] : null;
-    const uzVideoFile = req.files['uz_video'] ? req.files['uz_video'][0] : null;
 
-    // Check if required fields are present
     if (
       !Rudata ||
       !Rudata.firstname ||
@@ -62,10 +57,7 @@ module.exports = async function CreateForAudio(req, res) {
       !Uzdata.description ||
       !ruSmallaudioFile ||
       !ruImageFile ||
-      !ruVideoFile ||
-      !uzSmallaudioFile ||
-      !uzImageFile ||
-      !uzVideoFile
+      !ruVideoFile 
     ) {
       console.log('Missing required fields for creating a new audio entry.');
       return res.status(400).json({
@@ -73,13 +65,10 @@ module.exports = async function CreateForAudio(req, res) {
       });
     }
   try {
-    const [ruSmallaudioURL, ruImageURL, ruVideoURL, uzSmallaudioURL, uzImageURL, uzVideoURL] = await Promise.all([
+    const [ruSmallaudioURL, ruImageURL, ruVideoURL] = await Promise.all([
       uploadToS3(ruSmallaudioFile, 'mp3'),
       uploadToS3(ruImageFile, 'png'),
-      uploadToS3(ruVideoFile, 'mp4'),
-      uploadToS3(uzSmallaudioFile, 'mp3'),
-      uploadToS3(uzImageFile, 'png'),
-      uploadToS3(uzVideoFile, 'mp4')
+      uploadToS3(ruVideoFile, 'mp4')
     ]);
 
     const newAudioEntry = new MainSchema({
@@ -93,9 +82,9 @@ module.exports = async function CreateForAudio(req, res) {
       },
       uz: {
         ...Uzdata,
-        smallaudio: uzSmallaudioURL,
-        image: uzImageURL,
-        video: uzVideoURL,
+        smallaudio: ruSmallaudioURL,
+        image: ruImageURL,
+        video: ruVideoURL,
         audios:[]
       },
     });

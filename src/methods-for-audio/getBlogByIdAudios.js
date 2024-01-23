@@ -25,6 +25,7 @@ const getById = async (req, res) => {
         image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.image),
         video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.video),
         instagram: languageData.instagram,
+        smallimage: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.smallimage),
         audios: languageData.audios.map(item => ({
           id: item.id,
           title: item.title,

@@ -65,6 +65,7 @@ const CreateById = async (req, res) => {
       return {
         _id: id,
         id: audioId,
+        
         title: ruData.title,
         description: ruData.description,
         audio: audioURL,
@@ -82,7 +83,6 @@ const CreateById = async (req, res) => {
       };
     });
     
-    // Use Promise.all for both language promises
     const [ruAudioEntries, uzAudioEntries] = await Promise.all([
       Promise.all(ruAudios),
       Promise.all(uzAudios),

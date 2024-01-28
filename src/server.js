@@ -37,6 +37,17 @@ const GetAllLinks = require("./links-methods/GetAllLinks");
 const UpdateById = require("./methods-for-audio/updateOneAudio");
 const DeleteAudioById = require("./methods-for-audio/UpdateAudio");
 const CreateBlog = require("./methods/CreateBlog");
+const getAdmin = require("./Admin/getAdmin");
+const Admin  = require("./model/admin");
+const delteAdmin = require("./Admin/delteAdmin");
+const login = require("./Admin/login");
+const UpdateAdmin = require("./Admin/update")
+const SendConfirmationNumber = require("./Admin/forgotPadd")
+const confirmConfirmationCode = require("./Admin/Confirm")
+const CreateCusmtomers = require("./Customers/Create")
+const GetCuustomer = require("./Customers/GetCustomers")
+const DeleteCustomer = require("./Customers/DeleteCustomers");
+const loginCustomers = require("./Customers/loginCustomers");
 
 
 const PORT = process.env.PORT || 5001;
@@ -61,6 +72,8 @@ async function connect() {
 }
 
 connect();
+
+
 
 // Multer configurations
 const storage = multer.diskStorage({
@@ -109,12 +122,6 @@ app.post("/api/audios", uploadSmallAudio, CreateForAudio);
 
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
-const corsOptions = {
-  origin: 'http://127.0.0.1:5500', // or '*' for any origin
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  optionsSuccessStatus: 204,
-};
 
 app.use(cors());
 
@@ -163,6 +170,22 @@ app.get('/api/links', GetAllLinks);
 app.get('/api/links/:id', getLinkyId);
 app.put('/api/links/:id', updateLinkById);
 app.delete('/api/links/:id', deleteLinkById);
+
+// Admin
+app.get("/api/admin",getAdmin)
+app.delete("/api/admin/:id",delteAdmin)
+app.post("/api/admin",login)
+app.put("/api/admin/:id",uploadImage.single("image"), UpdateAdmin)
+app.post("/api/admin/confirm",SendConfirmationNumber)
+app.post("/api/admin/confirmation",confirmConfirmationCode)
+
+
+// Customers
+app.get("/api/customers",GetCuustomer)
+app.delete("/api/customers/:id",DeleteCustomer)
+app.post("/api/customers/",CreateCusmtomers)
+app.post("/api/customers/login",loginCustomers)
+
 
 
 // Static file serving

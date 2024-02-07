@@ -16,8 +16,8 @@ module.exports = async function updateBlog(req, res) {
       await fs.unlink(`.${existingBlog.uz.image}`);
     }
 
-    existingBlog.ru = { ...existingBlog.ru, ...JSON.parse(ru) };
-    existingBlog.uz = { ...existingBlog.uz, ...JSON.parse(uz) };
+    existingBlog.ru = { ...JSON.parse(ru) };
+    existingBlog.uz = {...JSON.parse(uz) };
     if (imagePath) {
       existingBlog.uz.image = `/${imagePath}`;
       existingBlog.ru.image = `/${imagePath}`;

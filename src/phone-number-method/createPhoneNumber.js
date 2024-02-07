@@ -3,30 +3,37 @@ const Phone = require("../model/phoneNumber");
 module.exports = function createPhone(req, res) {
   const { number, instagram } = req.body;
   console.log(req.body);
-  const existingBlog = Phone.findOne();
 
-  if (existingBlog) {
-    return res.status(400).json({ error: "A blog post already exists. Cannot create another one." });
-  }
+  Phone.findOne()
+    .then(existingPhone => {
+      console.log(existingPhone);
 
-  if (!number) {
-    return res.status(400).json({ error: "Phone number is required." });
-  }
-
-  const newPhone = new Phone({ number, instagram });
-
-  newPhone.save()
-    .then((createdPhone) => {
-      res.status(201).json(createdPhone);
-    })
-    .catch((error) => {
-      console.error(error);
-
-      // Check if the error is due to validation (e.g., required field missing)
-      if (error.name === 'ValidationError') {
-        return res.status(400).json({ error: error.message });
+      if (existingPhone) {
+        return res.status(400).json({ error: "A phone entry already exists. Cannot create another one." });
       }
 
-      res.status(500).json({ error: "Internal Server Error. Failed to create phone number." });
+      if (!number) {
+        return res.status(400).json({ error: "Phone number is required." });
+      }
+
+      const newPhone = new Phone({ number, instagram });
+
+      newPhone.save()
+        .then((createdPhone) => {
+          res.status(201).json(createdPhone);
+        })
+        .catch((error) => {
+          console.error(error);
+
+          if (error.name === 'ValidationError') {
+            return res.status(400).json({ error: error.message });
+          }
+
+          res.status(500).json({ error: "Internal Server Error. Failed to create phone number." });
+        });
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error. Failed to find phone." });
     });
 };

@@ -5,10 +5,10 @@ const Main = require("../model/audio");
 const path = require('path');
 
 AWS.config.update({
-  accessKeyId: "DO00RZZQCCEHPQH448HK",
-  secretAccessKey: "qtuZR0ViIx3P8oI1LcjLhWoclWnvqH+Gs1T1tf6Hp9U",
+  accessKeyId: "DO006ALHHDYXV6HC42D4",
+  secretAccessKey: "zupg1Xk9orEhnsisf4w5mzIiSDKdWuZkOfs0VYHMTd4",
   region: 'us-east-1',
-  endpoint: new AWS.Endpoint('https://audio-app-javohir.blr1.digitaloceanspaces.com'),
+  endpoint: new AWS.Endpoint('https://audio-videos.nyc3.digitaloceanspaces.com'),
   s3ForcePathStyle: true,
 });
 

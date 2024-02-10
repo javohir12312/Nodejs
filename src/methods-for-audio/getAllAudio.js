@@ -22,7 +22,7 @@ module.exports = async function getAllAudio(req, res) {
           return {
             id: item.id,
             title: item.title,
-            audio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(item.audio),
+            audio: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(item.audio),
             description: item.description,
           };
         });
@@ -34,10 +34,10 @@ module.exports = async function getAllAudio(req, res) {
           firstname: entry.ru.firstname,
           lastname: entry.ru.lastname,
           description: entry.ru.description,
-          smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallaudio),
-          image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.image),
-          video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.video),
-          smallimage: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallimage),
+          smallaudio: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallaudio),
+          image: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.image),
+          video: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.video),
+          smallimage: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallimage),
           instagram: entry.ru.instagram,
           audios: mapAudioData(entry.ru.audios),  // Include audios with URLs here
         },
@@ -45,11 +45,11 @@ module.exports = async function getAllAudio(req, res) {
           firstname: entry.uz.firstname,
           lastname: entry.uz.lastname,
           description: entry.description,
-          smallaudio: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.smallaudio),
-          image: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.image),
-          video: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.video),
+          smallaudio: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.smallaudio),
+          image: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.image),
+          video: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.video),
           instagram: entry.uz.instagram,
-          smallimage: "https://audio-app-javohir.blr1.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.smallimage),
+          smallimage: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.smallimage),
           audios: mapAudioData(entry.uz.audios),  // Include audios with URLs here
         },
       };

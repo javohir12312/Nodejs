@@ -129,7 +129,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"] 
 }));
 
-app.use(express.json(config));
+app.use(express.json());
 
 // Routes
 app.get("/api/hero", getAllBlogs);
@@ -184,7 +184,6 @@ app.post("/api/admin/confirm",SendConfirmationNumber)
 app.post("/api/admin/confirmation",confirmConfirmationCode)
 
 
-// Customers
 app.get("/api/customers",GetCuustomer)
 app.delete("/api/customers/:id",DeleteCustomer)
 app.post("/api/customers/",CreateCusmtomers)
@@ -192,23 +191,20 @@ app.post("/api/customers/login",loginCustomers)
 
 
 
-// Static file serving
 app.use("/uploads", express.static("uploads"));
 app.use("/uploads-logo", express.static("uploads-logo"));
 app.use("/audio-uploads", express.static("audio-uploads"));
 
-// Request logging middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something went wrong!');
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
 });
 
-// Handle SIGINT signalxop 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
     console.log('MongoDB connection closed.');

@@ -122,10 +122,16 @@ app.post("/api/audios", uploadSmallAudio, CreateForAudio);
 
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
+const config = {
+  headers: {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  }
+};
 
 app.use(cors());
 
-app.use(express.json());
+app.use(express.json(config));
 
 // Routes
 app.get("/api/hero", getAllBlogs);

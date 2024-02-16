@@ -3,7 +3,7 @@ const Main = require("../model/audio");
 
 module.exports = async function getAllAudio(req, res) {
   try {
-    const audioEntries = await Main.find({}, '_id ru.firstname ru.lastname ru.smallaudio ru.image ru.audios description ru.video ru.instagram uz.firstname uz.lastname uz.smallaudio uz.image uz.audios description uz.video uz.instagram uz.smallimage ru.smallimage');
+    const audioEntries = await Main.find({}, '_id ru.firstname ru.lastname ru.smallaudio ru.image ru.audios description ru.video ru.instagram uz.firstname uz.lastname uz.smallaudio uz.image uz.audios description uz.video uz.instagram');
     
     if (!audioEntries || audioEntries.length === 0) {
       return res.status(404).json({ error: "Audio data not found." });
@@ -37,7 +37,6 @@ module.exports = async function getAllAudio(req, res) {
           smallaudio: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallaudio),
           image: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.image),
           video: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.video),
-          smallimage: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.ru.smallimage),
           instagram: entry.ru.instagram,
           audios: mapAudioData(entry.ru.audios),  // Include audios with URLs here
         },
@@ -49,7 +48,6 @@ module.exports = async function getAllAudio(req, res) {
           image: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.image),
           video: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.video),
           instagram: entry.uz.instagram,
-          smallimage: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(entry.uz.smallimage),
           audios: mapAudioData(entry.uz.audios),  // Include audios with URLs here
         },
       };

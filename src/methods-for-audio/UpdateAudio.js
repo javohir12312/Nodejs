@@ -65,11 +65,10 @@ module.exports = async function UpdateAudioEntry(req, res) {
       });
     }
 
-    const [ruSmallaudioURL, ruImageURL, ruVideoURL,smallImageURLL] = await Promise.all([
+    const [ruSmallaudioURL, ruImageURL, ruVideoURL] = await Promise.all([
       uploadToS3(req.files['ru_smallaudio'][0], 'mp3'),
       uploadToS3(req.files['ru_image'][0], 'png'),
       uploadToS3(req.files['ru_video'][0], 'mp4'),
-      uploadToS3(req.files['ru_smallimage'][0], 'png'),
     ]);
 
     existingAudioEntry.ru = {
@@ -77,7 +76,6 @@ module.exports = async function UpdateAudioEntry(req, res) {
       smallaudio: ruSmallaudioURL,
       image: ruImageURL,
       video: ruVideoURL,
-      smallimage:smallImageURLL
     };
 
     existingAudioEntry.uz = {
@@ -85,7 +83,6 @@ module.exports = async function UpdateAudioEntry(req, res) {
       smallaudio: ruSmallaudioURL,
       image: ruImageURL,
       video: ruVideoURL,
-      smallimage:smallImageURLL
     };
 
     const updatedAudioEntry = await existingAudioEntry.save();

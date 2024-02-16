@@ -39,7 +39,7 @@ const languageSchema = new mongoose.Schema({
   },
   smallimage:{
     type:String,
-    required:true
+    required:false
   },
   image: {
     type: String,

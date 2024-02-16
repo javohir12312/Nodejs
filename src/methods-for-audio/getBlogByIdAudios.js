@@ -25,7 +25,6 @@ const getById = async (req, res) => {
         image: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.image),
         video: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.video),
         instagram: languageData.instagram,
-        smallimage: "https://audio-videos.nyc3.digitaloceanspaces.com/audio-uploads/" + extractFileName(languageData.smallimage),
         audios: languageData.audios.map(item => ({
           id: item.id,
           title: item.title,

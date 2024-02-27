@@ -84,15 +84,12 @@ const UpdateById = async (req, res) => {
       Promise.all(uzAudioPromises),
     ]);
 
-    // Find the index of the audio entry with the provided id2
     const ruAudioIndex = mainAudio.ru.audios.findIndex((audio) => audio.id === id2);
     const uzAudioIndex = mainAudio.uz.audios.findIndex((audio) => audio.id === id2);
 
-    // Delete the existing audio file from S3
     await deleteFromS3(mainAudio.ru.audios[ruAudioIndex].audio);
     await deleteFromS3(mainAudio.uz.audios[uzAudioIndex].audio);
 
-    // Update the specific audio entry with the new data
     mainAudio.ru.audios[ruAudioIndex] = ruAudios[0];
     mainAudio.uz.audios[uzAudioIndex] = uzAudios[0];
 

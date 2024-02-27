@@ -35,36 +35,19 @@ const uploadToS3 = async (file, fileType) => {
 };
 
 module.exports = async function CreateForAudio(req, res) {
-    const { ru, uz } = req.body;
-
-    console.log(req.body);
-  const Rudata = JSON.parse(ru)
-  const Uzdata = JSON.parse(uz)
-
-    const ruSmallaudioFile = req.files['ru_smallaudio'] ? req.files['ru_smallaudio'][0] : null;
-    const ruImageFile = req.files['ru_image'] ? req.files['ru_image'][0] : null;
-    const ruVideoFile = req.files['ru_video'] ? req.files['ru_video'][0] : null;
-
-
-    if (
-      !Rudata ||
-      !Rudata.firstname ||
-      !Rudata.lastname ||
-      !Rudata.description ||
-      !Uzdata ||
-      !Uzdata.firstname ||
-      !Uzdata.lastname ||
-      !Uzdata.description ||
-      !ruSmallaudioFile ||
-      !ruImageFile ||
-      !ruVideoFile  
-    ) {
-      console.log('Missing required fields for creating a new audio entry.');
-      return res.status(400).json({
-        error: 'Missing required fields for creating a new audio entry.',
-      });
-    }
   try {
+    const { ru, uz } = req.body;
+    const Rudata = JSON.parse(ru);
+    const Uzdata = JSON.parse(uz);
+
+    const ruSmallaudioFile = req.files['ru_smallaudio'][0];
+    const ruImageFile = req.files['ru_image'][0];
+    const ruVideoFile = req.files['ru_video'][0];
+
+    if (!Rudata || !Uzdata || !ruSmallaudioFile || !ruImageFile || !ruVideoFile) {
+      return res.status(400).json({ error: 'Missing required fields for creating a new audio entry.' });
+    }
+
     const [ruSmallaudioURL, ruImageURL, ruVideoURL] = await Promise.all([
       uploadToS3(ruSmallaudioFile, 'mp3'),
       uploadToS3(ruImageFile, 'png'),
@@ -73,24 +56,12 @@ module.exports = async function CreateForAudio(req, res) {
 
     const newAudioEntry = new MainSchema({
       id: uuidv4(),
-      ru: {
-        ...Rudata,
-        smallaudio: ruSmallaudioURL,
-        image: ruImageURL,
-        video: ruVideoURL,
-        audios:[]
-      },
-      uz: {
-        ...Uzdata,
-        smallaudio: ruSmallaudioURL,
-        image: ruImageURL,
-        video: ruVideoURL,
-        audios:[]
-      },
+      ru: { ...Rudata, smallaudio: ruSmallaudioURL, image: ruImageURL, video: ruVideoURL, audios: [] },
+      uz: { ...Uzdata, smallaudio: ruSmallaudioURL, image: ruImageURL, video: ruVideoURL, audios: [] },
     });
 
     const createdAudio = await newAudioEntry.save();
-    res.status(201).json("created");
+    res.status(201).json(createdAudio);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to process the request.', detailedError: error.message });

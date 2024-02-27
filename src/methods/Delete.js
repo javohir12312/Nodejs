@@ -11,7 +11,9 @@ module.exports = async function deleteBlog(req, res) {
     }
 
     const imagePath = existingBlog.uz.image; 
-    await fs.unlink(`.${imagePath}`); 
+    if(imagePath){
+      await fs.unlink(`.${imagePath}`);
+    } 
 
     await existingBlog.deleteOne();
     

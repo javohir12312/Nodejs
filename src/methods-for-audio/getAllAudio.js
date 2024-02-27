@@ -3,7 +3,7 @@ const Main = require("../model/audio");
 
 module.exports = async function getAllAudio(req, res) {
   try {
-    const audioEntries = await Main.find({}, '_id ru.firstname ru.lastname ru.smallaudio ru.image ru.audios description ru.video ru.instagram uz.firstname uz.lastname uz.smallaudio uz.image uz.audios description uz.video uz.instagram');
+    const audioEntries = await Main.find({}, 'id ru.firstname ru.lastname ru.smallaudio ru.image ru.audios description ru.video ru.instagram uz.firstname uz.lastname uz.smallaudio uz.image uz.audios description uz.video uz.instagram');
     
     if (!audioEntries || audioEntries.length === 0) {
       return res.status(404).json({ error: "Audio data not found." });

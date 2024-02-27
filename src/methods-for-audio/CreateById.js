@@ -35,6 +35,7 @@ const uploadToS3 = async (file) => {
     throw error;
   }
 };
+
 const CreateById = async (req, res) => {
   try {
     const { uz, ru } = req.body;

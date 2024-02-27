@@ -51,7 +51,7 @@ const loginCustomers = require("./Customers/loginCustomers");
 
 
 const PORT = process.env.PORT || 5001;
-const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.uifiguj.mongodb.net/?retryWrites=true&w=majority";
+const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.2m3dx2b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // Connect to MongoDB
 const app = express();
 deleteAllFilesFromUploadsFolder()
@@ -108,6 +108,7 @@ const videoStorage = multer.diskStorage({
 });
 
 
+
 const uploadVideo = multer({ storage: videoStorage, limits: { fileSize: 100000000 } });
 const uploadImage = multer({ storage });
 const uploadLogo = multer({ storage: LogoStorage });
@@ -117,7 +118,7 @@ const uploadSmallAudio = multer({ storage: audioStorage, limits: { fileSize: 100
   { name: 'ru_video', maxCount: 1 },
 ])
 
-app.post("/api/audios", uploadSmallAudio, CreateForAudio);
+// app.post("/api/audios", uploadSmallAudio, CreateForAudio);
 
 const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 100000000 } });
 
@@ -196,18 +197,22 @@ app.use("/uploads", express.static("uploads"));
 app.use("/uploads-logo", express.static("uploads-logo"));
 app.use("/audio-uploads", express.static("audio-uploads"));
 
-// Request logging middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    res.setHeader('Access-Control-Allow-Credentials', true);
   res.status(500).send('Something went wrong!');
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
 });
 
-// Handle SIGINT signalxop 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
     console.log('MongoDB connection closed.');

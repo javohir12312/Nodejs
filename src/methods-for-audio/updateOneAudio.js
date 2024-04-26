@@ -8,7 +8,7 @@ AWS.config.update({
   accessKeyId: "DO00DZBEXD7BD4463RWE",
   secretAccessKey: "ERYtbsgstP5l+haWAVuAjz4KUovCsy4/DNh2gyIbgps",
   region: 'us-east-1',
-  endpoint: new AWS.Endpoint('https://audio-videos.nyc3.digitaloceanspaces.com'),
+  endpoint: new AWS.Endpoint('https://javohir.sfo3.digitaloceanspaces.com'),
   s3ForcePathStyle: true,
 });
 

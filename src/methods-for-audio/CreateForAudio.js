@@ -3,14 +3,14 @@ const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
 const MainSchema = require("../model/audio");  // Assuming you've renamed your model to "Main"
 
-const secretAccessKey = "zupg1Xk9orEhnsisf4w5mzIiSDKdWuZkOfs0VYHMTd4";
-const accessKeyId = "DO006ALHHDYXV6HC42D4";
+const secretAccessKey = "ERYtbsgstP5l+haWAVuAjz4KUovCsy4/DNh2gyIbgps";
+const accessKeyId = "DO00DZBEXD7BD4463RWE";
 
 AWS.config.update({
   accessKeyId: accessKeyId,
   secretAccessKey: secretAccessKey,
   region: 'us-east-1',
-  endpoint: new AWS.Endpoint('https://audio-videos.nyc3.digitaloceanspaces.com'),
+  endpoint: new AWS.Endpoint('https://javohir.sfo3.digitaloceanspaces.com'),
   s3ForcePathStyle: true,
 });
 

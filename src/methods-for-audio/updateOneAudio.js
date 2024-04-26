@@ -5,8 +5,8 @@ const Main = require("../model/audio");
 const path = require('path');
 
 AWS.config.update({
-  accessKeyId: "DO006ALHHDYXV6HC42D4",
-  secretAccessKey: "zupg1Xk9orEhnsisf4w5mzIiSDKdWuZkOfs0VYHMTd4",
+  accessKeyId: "DO00DZBEXD7BD4463RWE",
+  secretAccessKey: "ERYtbsgstP5l+haWAVuAjz4KUovCsy4/DNh2gyIbgps",
   region: 'us-east-1',
   endpoint: new AWS.Endpoint('https://audio-videos.nyc3.digitaloceanspaces.com'),
   s3ForcePathStyle: true,

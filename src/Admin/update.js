@@ -9,7 +9,6 @@ const Main = require("../model/audio"); // Use the Main model
 const { v4: uuidv4 } = require('uuid');
 const { exec } = require('child_process');
 
-// AWS Configuration
 const secretAccessKey = "zupg1Xk9orEhnsisf4w5mzIiSDKdWuZkOfs0VYHMTd4";
 const accessKeyId = "DO006ALHHDYXV6HC42D4";
 

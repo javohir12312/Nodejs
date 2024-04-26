@@ -43,7 +43,7 @@ module.exports = async function deleteAudio(req, res) {
       });
     }
 
-    await Promise.all(deletionPromises); // Wait for all deletions to complete
+    await Promise.all(deletionPromises);
 
     const deletedAudioEntry = await AudioSchema.findByIdAndDelete(id);
 

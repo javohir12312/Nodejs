@@ -1,6 +1,6 @@
 const fs = require('fs');  // Import the fs module
 const Logo = require("../model/logo");
-const deleteAllFilesFromUploadsFolder = require('../helpers');
+// const deleteAllFilesFromUploadsFolder = require('../helpers');
 
 module.exports =updateLogo = async function(req, res) {
   const { id } = req.params; 
@@ -21,7 +21,7 @@ module.exports =updateLogo = async function(req, res) {
       return null;
     }
   };
-  deleteAllFilesFromUploadsFolder()
+  // deleteAllFilesFromUploadsFolder()
 
   const imageBuffer = readFileToBuffer(image);
   const light = readFileToBuffer(image2);

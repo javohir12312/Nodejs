@@ -30,7 +30,7 @@ const getAll = require("./phone-number-method/GetAllNumber")
 const getPhoneById = require("./phone-number-method/GetByid")
 const updatePhoneById = require("./phone-number-method/Update")
 const deletePhoneById = require("./phone-number-method/deletePhone");
-const deleteAllFilesFromUploadsFolder = require("./helpers");
+// const deleteAllFilesFromUploadsFolder = require("./helpers");
 const updateOneLink = require("./methods-for-audio/UpdataOneLink");
 const CreateLink = require("./links-methods/CreateLink");
 const GetAllLinks = require("./links-methods/GetAllLinks");
@@ -54,7 +54,7 @@ const PORT = process.env.PORT || 5003;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.2m3dx2b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // Connect to MongoDB
 const app = express();
-deleteAllFilesFromUploadsFolder()
+// deleteAllFilesFromUploadsFolder()
 async function connect() {
   try {
     await mongoose.connect(url, {
@@ -124,7 +124,7 @@ const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 10000000
 
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://admin-paneltest.netlify.app","http://192.168.100.19:999"],
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"] 
 }));
@@ -199,7 +199,7 @@ app.use("/audio-uploads", express.static("audio-uploads"));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', 'http://192.168.0.105:999');
 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 

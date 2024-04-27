@@ -50,7 +50,7 @@ const DeleteCustomer = require("./Customers/DeleteCustomers");
 const loginCustomers = require("./Customers/loginCustomers");
 
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5003;
 const url = "mongodb+srv://abduxalilovjavohir393:1984god123@cluster0.2m3dx2b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // Connect to MongoDB
 const app = express();
@@ -124,7 +124,7 @@ const uploadAudio = multer({ storage: audioStorage, limits: { fileSize: 10000000
 
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://admin-paneltest.netlify.app"],
+  origin: ["http://localhost:3000", "https://admin-paneltest.netlify.app","http://192.168.100.19:999"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"] 
 }));
